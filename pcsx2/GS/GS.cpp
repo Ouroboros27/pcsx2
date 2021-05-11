@@ -54,7 +54,7 @@ extern bool RunLinuxDialog();
 
 #define PS2E_LT_GS 0x01
 #define PS2E_GS_VERSION 0x0006
-#define PS2E_X86 0x01    // 32 bit
+#define PS2E_X86 0x01 // 32 bit
 #define PS2E_X86_64 0x02 // 64 bit
 
 static GSRenderer* s_gs = NULL;
@@ -65,25 +65,7 @@ static bool s_exclusive = true;
 static std::string s_renderer_name;
 bool gsopen_done = false; // crash guard for GSgetTitleInfo2 and GSKeyEvent (replace with lock?)
 
-EXPORT_C_(uint32) PS2EgetLibType()
-{
-	return PS2E_LT_GS;
-}
-
-EXPORT_C_(const char*) PS2EgetLibName()
-{
-	return GSUtil::GetLibName();
-}
-
-EXPORT_C_(uint32) PS2EgetLibVersion2(uint32 type)
-{
-	const uint32 revision = 1;
-	const uint32 build = 2;
-
-	return (build << 0) | (revision << 8) | (PS2E_GS_VERSION << 16) | (PLUGIN_VERSION << 24);
-}
-
-EXPORT_C_(uint32) PS2EgetCpuPlatform()
+uint32 PS2EgetCpuPlatform()
 {
 #ifdef _M_AMD64
 
@@ -96,7 +78,7 @@ EXPORT_C_(uint32) PS2EgetCpuPlatform()
 #endif
 }
 
-EXPORT_C GSsetBaseMem(uint8* mem)
+void GSsetBaseMem(uint8* mem)
 {
 	s_basemem = mem;
 
@@ -106,12 +88,12 @@ EXPORT_C GSsetBaseMem(uint8* mem)
 	}
 }
 
-EXPORT_C GSsetSettingsDir(const char* dir)
+void GSsetSettingsDir(const char* dir)
 {
 	theApp.SetConfigDir(dir);
 }
 
-EXPORT_C_(int) GSinit()
+int GSinit()
 {
 	if (!GSUtil::CheckSSE())
 	{
@@ -138,7 +120,7 @@ EXPORT_C_(int) GSinit()
 	return 0;
 }
 
-EXPORT_C GSshutdown()
+void GSshutdown()
 {
 	gsopen_done = false;
 
@@ -157,7 +139,7 @@ EXPORT_C GSshutdown()
 #endif
 }
 
-EXPORT_C GSclose()
+void GSclose()
 {
 	gsopen_done = false;
 
@@ -402,19 +384,19 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 	return 0;
 }
 
-EXPORT_C_(void) GSosdLog(const char* utf8, uint32 color)
+void GSosdLog(const char* utf8, uint32 color)
 {
 	if (s_gs && s_gs->m_dev)
 		s_gs->m_dev->m_osd.Log(utf8);
 }
 
-EXPORT_C_(void) GSosdMonitor(const char* key, const char* value, uint32 color)
+void GSosdMonitor(const char* key, const char* value, uint32 color)
 {
 	if (s_gs && s_gs->m_dev)
 		s_gs->m_dev->m_osd.Monitor(key, value);
 }
 
-EXPORT_C_(int) GSopen2(void** dsp, uint32 flags)
+int GSopen2(void** dsp, uint32 flags)
 {
 	static bool stored_toggle_state = false;
 	const bool toggle_state = !!(flags & 4);
@@ -466,7 +448,7 @@ EXPORT_C_(int) GSopen2(void** dsp, uint32 flags)
 	return retval;
 }
 
-EXPORT_C_(int) GSopen(void** dsp, const char* title, int mt)
+int GSopen(void** dsp, const char* title, int mt)
 {
 	GSRendererType renderer = GSRendererType::Default;
 
@@ -500,7 +482,7 @@ EXPORT_C_(int) GSopen(void** dsp, const char* title, int mt)
 	return retval;
 }
 
-EXPORT_C GSreset()
+void GSreset()
 {
 	try
 	{
@@ -511,7 +493,7 @@ EXPORT_C GSreset()
 	}
 }
 
-EXPORT_C GSgifSoftReset(uint32 mask)
+void GSgifSoftReset(uint32 mask)
 {
 	try
 	{
@@ -522,7 +504,7 @@ EXPORT_C GSgifSoftReset(uint32 mask)
 	}
 }
 
-EXPORT_C GSwriteCSR(uint32 csr)
+void GSwriteCSR(uint32 csr)
 {
 	try
 	{
@@ -533,7 +515,7 @@ EXPORT_C GSwriteCSR(uint32 csr)
 	}
 }
 
-EXPORT_C GSinitReadFIFO(uint8* mem)
+void GSinitReadFIFO(uint8* mem)
 {
 	GL_PERF("Init Read FIFO1");
 	try
@@ -549,7 +531,7 @@ EXPORT_C GSinitReadFIFO(uint8* mem)
 	}
 }
 
-EXPORT_C GSreadFIFO(uint8* mem)
+void GSreadFIFO(uint8* mem)
 {
 	try
 	{
@@ -564,7 +546,7 @@ EXPORT_C GSreadFIFO(uint8* mem)
 	}
 }
 
-EXPORT_C GSinitReadFIFO2(uint8* mem, uint32 size)
+void GSinitReadFIFO2(uint8* mem, uint32 size)
 {
 	GL_PERF("Init Read FIFO2");
 	try
@@ -580,7 +562,7 @@ EXPORT_C GSinitReadFIFO2(uint8* mem, uint32 size)
 	}
 }
 
-EXPORT_C GSreadFIFO2(uint8* mem, uint32 size)
+void GSreadFIFO2(uint8* mem, uint32 size)
 {
 	try
 	{
@@ -595,7 +577,7 @@ EXPORT_C GSreadFIFO2(uint8* mem, uint32 size)
 	}
 }
 
-EXPORT_C GSgifTransfer(const uint8* mem, uint32 size)
+void GSgifTransfer(const uint8* mem, uint32 size)
 {
 	try
 	{
@@ -606,7 +588,7 @@ EXPORT_C GSgifTransfer(const uint8* mem, uint32 size)
 	}
 }
 
-EXPORT_C GSgifTransfer1(uint8* mem, uint32 addr)
+void GSgifTransfer1(uint8* mem, uint32 addr)
 {
 	try
 	{
@@ -617,7 +599,7 @@ EXPORT_C GSgifTransfer1(uint8* mem, uint32 addr)
 	}
 }
 
-EXPORT_C GSgifTransfer2(uint8* mem, uint32 size)
+void GSgifTransfer2(uint8* mem, uint32 size)
 {
 	try
 	{
@@ -628,7 +610,7 @@ EXPORT_C GSgifTransfer2(uint8* mem, uint32 size)
 	}
 }
 
-EXPORT_C GSgifTransfer3(uint8* mem, uint32 size)
+void GSgifTransfer3(uint8* mem, uint32 size)
 {
 	try
 	{
@@ -639,7 +621,7 @@ EXPORT_C GSgifTransfer3(uint8* mem, uint32 size)
 	}
 }
 
-EXPORT_C GSvsync(int field)
+void GSvsync(int field)
 {
 	try
 	{
@@ -671,7 +653,7 @@ EXPORT_C GSvsync(int field)
 	}
 }
 
-EXPORT_C_(uint32) GSmakeSnapshot(char* path)
+uint32 GSmakeSnapshot(char* path)
 {
 	try
 	{
@@ -700,7 +682,7 @@ EXPORT_C_(uint32) GSmakeSnapshot(char* path)
 	}
 }
 
-EXPORT_C GSkeyEvent(GSKeyEventData* e)
+void GSkeyEvent(GSKeyEventData* e)
 {
 	try
 	{
@@ -714,7 +696,7 @@ EXPORT_C GSkeyEvent(GSKeyEventData* e)
 	}
 }
 
-EXPORT_C_(int) GSfreeze(int mode, GSFreezeData* data)
+int GSfreeze(int mode, GSFreezeData* data)
 {
 	try
 	{
@@ -738,7 +720,7 @@ EXPORT_C_(int) GSfreeze(int mode, GSFreezeData* data)
 	return 0;
 }
 
-EXPORT_C GSconfigure()
+void GSconfigure()
 {
 	try
 	{
@@ -763,12 +745,12 @@ EXPORT_C GSconfigure()
 		// We can convince it that touching that pool would be unsafe by running all GTK calls within a CFRunLoop
 		// (Blocks submitted to the main queue by dispatch_async are run by its CFRunLoop)
 		dispatch_async(dispatch_get_main_queue(), ^{
-			if (RunLinuxDialog())
-			{
-				theApp.ReloadConfig();
-				// Force a reload of the gs state
-				theApp.SetCurrentRendererType(GSRendererType::Undefined);
-			}
+		  if (RunLinuxDialog())
+		  {
+			  theApp.ReloadConfig();
+			  // Force a reload of the gs state
+			  theApp.SetCurrentRendererType(GSRendererType::Undefined);
+		  }
 		});
 #else
 
@@ -786,7 +768,7 @@ EXPORT_C GSconfigure()
 	}
 }
 
-EXPORT_C_(int) GStest()
+int GStest()
 {
 	if (!GSUtil::CheckSSE())
 		return -1;
@@ -794,11 +776,7 @@ EXPORT_C_(int) GStest()
 	return 0;
 }
 
-EXPORT_C GSabout()
-{
-}
-
-EXPORT_C GSirqCallback(void (*irq)())
+void GSirqCallback(void (*irq)())
 {
 	s_irq = irq;
 
@@ -819,7 +797,7 @@ void pt(const char* str)
 	printf("%02i:%02i:%02i%s", current->tm_hour, current->tm_min, current->tm_sec, str);
 }
 
-EXPORT_C_(bool) GSsetupRecording(std::string& filename)
+bool GSsetupRecording(std::string& filename)
 {
 	if (s_gs == NULL)
 	{
@@ -846,24 +824,24 @@ EXPORT_C_(bool) GSsetupRecording(std::string& filename)
 	}
 }
 
-EXPORT_C_(void) GSendRecording()
+void GSendRecording()
 {
 	printf("GSdx: Recording end command\n");
 	s_gs->EndCapture();
 	pt(" - Capture ended\n");
 }
 
-EXPORT_C GSsetGameCRC(uint32 crc, int options)
+void GSsetGameCRC(uint32 crc, int options)
 {
 	s_gs->SetGameCRC(crc, options);
 }
 
-EXPORT_C GSgetLastTag(uint32* tag)
+void GSgetLastTag(uint32* tag)
 {
 	s_gs->GetLastTag(tag);
 }
 
-EXPORT_C GSgetTitleInfo2(char* dest, size_t length)
+void GSgetTitleInfo2(char* dest, size_t length)
 {
 	std::string s;
 	s.append(s_renderer_name);
@@ -883,12 +861,12 @@ EXPORT_C GSgetTitleInfo2(char* dest, size_t length)
 	strcpy(dest, s.c_str());
 }
 
-EXPORT_C GSsetFrameSkip(int frameskip)
+void GSsetFrameSkip(int frameskip)
 {
 	s_gs->SetFrameSkip(frameskip);
 }
 
-EXPORT_C GSsetVsync(int vsync)
+void GSsetVsync(int vsync)
 {
 	s_vsync = vsync;
 
@@ -898,7 +876,7 @@ EXPORT_C GSsetVsync(int vsync)
 	}
 }
 
-EXPORT_C GSsetExclusive(int enabled)
+void GSsetExclusive(int enabled)
 {
 	s_exclusive = !!enabled;
 
@@ -985,7 +963,7 @@ public:
 //   First parameter is the renderer.
 //   Second parameter is the gs file to load and run.
 
-EXPORT_C GSReplay(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
+void GSReplay(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 {
 	GSRendererType renderer = GSRendererType::Undefined;
 
@@ -1010,9 +988,7 @@ EXPORT_C GSReplay(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 	const std::string f{lpszCmdLine};
 	const bool is_xz = f.size() >= 4 && f.compare(f.size() - 3, 3, ".xz") == 0;
 
-	auto file = is_xz
-		? std::unique_ptr<GSDumpFile>{std::make_unique<GSDumpLzma>(lpszCmdLine, nullptr)}
-		: std::unique_ptr<GSDumpFile>{std::make_unique<GSDumpRaw>(lpszCmdLine, nullptr)};
+	auto file = is_xz ? std::unique_ptr<GSDumpFile>{std::make_unique<GSDumpLzma>(lpszCmdLine, nullptr)} : std::unique_ptr<GSDumpFile>{std::make_unique<GSDumpRaw>(lpszCmdLine, nullptr)};
 
 	GSinit();
 
@@ -1103,19 +1079,28 @@ EXPORT_C GSReplay(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 			switch (p.type)
 			{
 				case 0:
-					switch(p.param)
+					switch (p.param)
 					{
-						case 0: GSgifTransfer1(p.buff.data(), p.addr); break;
-						case 1: GSgifTransfer2(p.buff.data(), p.size / 16); break;
-						case 2: GSgifTransfer3(p.buff.data(), p.size / 16); break;
-						case 3: GSgifTransfer(p.buff.data(), p.size / 16); break;
+						case 0:
+							GSgifTransfer1(p.buff.data(), p.addr);
+							break;
+						case 1:
+							GSgifTransfer2(p.buff.data(), p.size / 16);
+							break;
+						case 2:
+							GSgifTransfer3(p.buff.data(), p.size / 16);
+							break;
+						case 3:
+							GSgifTransfer(p.buff.data(), p.size / 16);
+							break;
 					}
 					break;
 				case 1:
 					GSvsync(p.param);
 					break;
 				case 2:
-					if(buff.size() < p.size) buff.resize(p.size);
+					if (buff.size() < p.size)
+						buff.resize(p.size);
 					GSreadFIFO2(p.buff.data(), p.size / 16);
 					break;
 				case 3:
@@ -1131,7 +1116,7 @@ EXPORT_C GSReplay(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 	GSshutdown();
 }
 
-EXPORT_C GSBenchmark(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
+void GSBenchmark(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 {
 	::SetPriorityClass(::GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 
@@ -1141,22 +1126,26 @@ EXPORT_C GSBenchmark(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow
 	{
 		GSLocalMemory* mem = new GSLocalMemory();
 
-		static struct {int psm; const char* name;} s_format[] =
+		static struct
 		{
-			{PSM_PSMCT32, "32"},
-			{PSM_PSMCT24, "24"},
-			{PSM_PSMCT16, "16"},
-			{PSM_PSMCT16S, "16S"},
-			{PSM_PSMT8, "8"},
-			{PSM_PSMT4, "4"},
-			{PSM_PSMT8H, "8H"},
-			{PSM_PSMT4HL, "4HL"},
-			{PSM_PSMT4HH, "4HH"},
-			{PSM_PSMZ32, "32Z"},
-			{PSM_PSMZ24, "24Z"},
-			{PSM_PSMZ16, "16Z"},
-			{PSM_PSMZ16S, "16ZS"},
-		};
+			int psm;
+			const char* name;
+		} s_format[] =
+			{
+				{PSM_PSMCT32, "32"},
+				{PSM_PSMCT24, "24"},
+				{PSM_PSMCT16, "16"},
+				{PSM_PSMCT16S, "16S"},
+				{PSM_PSMT8, "8"},
+				{PSM_PSMT4, "4"},
+				{PSM_PSMT8H, "8H"},
+				{PSM_PSMT4HL, "4HL"},
+				{PSM_PSMT4HH, "4HH"},
+				{PSM_PSMZ32, "32Z"},
+				{PSM_PSMZ24, "24Z"},
+				{PSM_PSMZ16, "16Z"},
+				{PSM_PSMZ16S, "16ZS"},
+			};
 
 		uint8* ptr = (uint8*)_aligned_malloc(1024 * 1024 * 4, 32);
 
@@ -1348,7 +1337,7 @@ inline unsigned long timeGetTime()
 }
 
 // Note
-EXPORT_C GSReplay(char* lpszCmdLine, int renderer)
+GSReplay(char* lpszCmdLine, int renderer)
 {
 	GLLoader::in_replayer = true;
 	// Required by multithread driver
@@ -1411,9 +1400,7 @@ EXPORT_C GSReplay(char* lpszCmdLine, int renderer)
 		else
 			f.replace(f.end() - 3, f.end(), "_repack.gs");
 
-		GSDumpFile* file = is_xz
-			? (GSDumpFile*) new GSDumpLzma(lpszCmdLine, repack_dump ? f.c_str() : nullptr)
-			: (GSDumpFile*) new GSDumpRaw(lpszCmdLine, repack_dump ? f.c_str() : nullptr);
+		GSDumpFile* file = is_xz ? (GSDumpFile*)new GSDumpLzma(lpszCmdLine, repack_dump ? f.c_str() : nullptr) : (GSDumpFile*)new GSDumpRaw(lpszCmdLine, repack_dump ? f.c_str() : nullptr);
 
 		uint32 crc;
 		file->Read(&crc, 4);
@@ -1507,10 +1494,18 @@ EXPORT_C GSReplay(char* lpszCmdLine, int renderer)
 
 					switch (p->param)
 					{
-						case 0: GSgifTransfer1(&p->buff[0], p->addr); break;
-						case 1: GSgifTransfer2(&p->buff[0], p->size / 16); break;
-						case 2: GSgifTransfer3(&p->buff[0], p->size / 16); break;
-						case 3: GSgifTransfer(&p->buff[0], p->size / 16); break;
+						case 0:
+							GSgifTransfer1(&p->buff[0], p->addr);
+							break;
+						case 1:
+							GSgifTransfer2(&p->buff[0], p->size / 16);
+							break;
+						case 2:
+							GSgifTransfer3(&p->buff[0], p->size / 16);
+							break;
+						case 3:
+							GSgifTransfer(&p->buff[0], p->size / 16);
+							break;
 					}
 
 					break;
@@ -1558,9 +1553,9 @@ EXPORT_C GSReplay(char* lpszCmdLine, int renderer)
 #ifdef ENABLE_OGL_DEBUG_MEM_BW
 	unsigned long total_frame_nb = std::max(1l, frame_number) << 10;
 	fprintf(stderr, "memory bandwith. T: %f KB/f. V: %f KB/f. U: %f KB/f\n",
-			(float)g_real_texture_upload_byte / (float)total_frame_nb,
-			(float)g_vertex_upload_byte / (float)total_frame_nb,
-			(float)g_uniform_upload_byte / (float)total_frame_nb);
+		(float)g_real_texture_upload_byte / (float)total_frame_nb,
+		(float)g_vertex_upload_byte / (float)total_frame_nb,
+		(float)g_uniform_upload_byte / (float)total_frame_nb);
 #endif
 
 	for (auto i = packets.begin(); i != packets.end(); i++)
