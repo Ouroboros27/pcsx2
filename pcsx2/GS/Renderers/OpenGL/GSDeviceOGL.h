@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Renderers/Common/GSDevice.h"
+#include "../Common/GSDevice.h"
 #include "GSTextureOGL.h"
-#include "GSdx.h"
+#include "../../GS.h"
 #include "GSVertexArrayOGL.h"
 #include "GSUniformBufferOGL.h"
 #include "GSShaderOGL.h"
@@ -140,9 +140,9 @@ public:
 		VSConstantBuffer()
 		{
 			Vertex_Scale_Offset = GSVector4::zero();
-			TextureOffset       = GSVector4::zero();
-			PointSize           = GSVector2(0);
-			MaxDepth            = GSVector2i(0);
+			TextureOffset = GSVector4::zero();
+			PointSize = GSVector2(0);
+			MaxDepth = GSVector2i(0);
 		}
 
 		__forceinline bool Update(const VSConstantBuffer* cb)
@@ -195,8 +195,8 @@ public:
 			struct
 			{
 				uint32 sprite : 1;
-				uint32 point  : 1;
-				uint32 line   : 1;
+				uint32 point : 1;
+				uint32 line : 1;
 
 				uint32 _free : 29;
 			};
@@ -234,14 +234,14 @@ public:
 		PSConstantBuffer()
 		{
 			FogColor_AREF = GSVector4::zero();
-			HalfTexel     = GSVector4::zero();
-			WH            = GSVector4::zero();
-			TA_Af         = GSVector4::zero();
-			MinMax        = GSVector4::zero();
-			MskFix        = GSVector4i::zero();
-			TC_OH_TS      = GSVector4::zero();
-			FbMask        = GSVector4i::zero();
-			MaxDepth      = GSVector4::zero();
+			HalfTexel = GSVector4::zero();
+			WH = GSVector4::zero();
+			TA_Af = GSVector4::zero();
+			MinMax = GSVector4::zero();
+			MskFix = GSVector4i::zero();
+			TC_OH_TS = GSVector4::zero();
+			FbMask = GSVector4i::zero();
+			MaxDepth = GSVector4::zero();
 
 			DitherMatrix[0] = GSVector4::zero();
 			DitherMatrix[1] = GSVector4::zero();
@@ -255,8 +255,7 @@ public:
 			GSVector4i* b = (GSVector4i*)cb;
 
 			// if WH matches both HalfTexel and TC_OH_TS do too
-			if (!((a[0] == b[0]) & (a[1] == b[1]) & (a[2] == b[2]) & (a[3] == b[3]) & (a[4] == b[4]) & (a[6] == b[6])
-				& (a[8] == b[8]) & (a[9] == b[9]) & (a[10] == b[10]) & (a[11] == b[11]) & (a[12] == b[12])).alltrue())
+			if (!((a[0] == b[0]) & (a[1] == b[1]) & (a[2] == b[2]) & (a[3] == b[3]) & (a[4] == b[4]) & (a[6] == b[6]) & (a[8] == b[8]) & (a[9] == b[9]) & (a[10] == b[10]) & (a[11] == b[11]) & (a[12] == b[12])).alltrue())
 			{
 				// Note previous check uses SSE already, a plain copy will be faster than any memcpy
 				a[0] = b[0];
@@ -292,8 +291,8 @@ public:
 			{
 				// *** Word 1
 				// Format
-				uint32 tex_fmt   : 4;
-				uint32 dfmt      : 2;
+				uint32 tex_fmt : 4;
+				uint32 dfmt : 2;
 				uint32 depth_fmt : 2;
 				// Alpha extension/Correction
 				uint32 aem : 1;
@@ -313,10 +312,10 @@ public:
 				uint32 wmt : 2;
 				uint32 ltf : 1;
 				// Shuffle and fbmask effect
-				uint32 shuffle  : 1;
-				uint32 read_ba  : 1;
+				uint32 shuffle : 1;
+				uint32 read_ba : 1;
 				uint32 write_rg : 1;
-				uint32 fbmask   : 1;
+				uint32 fbmask : 1;
 
 				//uint32 _free1:0;
 
@@ -326,10 +325,10 @@ public:
 				uint32 blend_b : 2;
 				uint32 blend_c : 2;
 				uint32 blend_d : 2;
-				uint32 clr1    : 1; // useful?
-				uint32 hdr     : 1;
+				uint32 clr1 : 1; // useful?
+				uint32 hdr : 1;
 				uint32 colclip : 1;
-				uint32 pabe    : 1;
+				uint32 pabe : 1;
 
 				// Others ways to fetch the texture
 				uint32 channel : 3;
@@ -371,9 +370,9 @@ public:
 		{
 			struct
 			{
-				uint32 tau   : 1;
-				uint32 tav   : 1;
-				uint32 biln  : 1;
+				uint32 tau : 1;
+				uint32 tav : 1;
+				uint32 biln : 1;
 				uint32 triln : 3;
 				uint32 aniso : 1;
 
@@ -402,7 +401,7 @@ public:
 			struct
 			{
 				uint32 ztst : 2;
-				uint32 zwe  : 1;
+				uint32 zwe : 1;
 				uint32 date : 1;
 				uint32 date_one : 1;
 

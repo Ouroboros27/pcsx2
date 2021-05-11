@@ -22,10 +22,10 @@
 #pragma once
 
 #include "GSFastList.h"
-#include "Window/GSWnd.h"
+#include "../../Window/GSWnd.h"
 #include "GSTexture.h"
 #include "GSVertex.h"
-#include "GSAlignedClass.h"
+#include "../../GSAlignedClass.h"
 #include "GSOsdManager.h"
 
 enum ShaderConvert
@@ -55,13 +55,13 @@ enum ShaderConvert
 
 enum ChannelFetch
 {
-	ChannelFetch_NONE  = 0,
-	ChannelFetch_RED   = 1,
+	ChannelFetch_NONE = 0,
+	ChannelFetch_RED = 1,
 	ChannelFetch_GREEN = 2,
-	ChannelFetch_BLUE  = 3,
+	ChannelFetch_BLUE = 3,
 	ChannelFetch_ALPHA = 4,
-	ChannelFetch_RGB   = 5,
-	ChannelFetch_GXBY  = 6,
+	ChannelFetch_RGB = 5,
+	ChannelFetch_GXBY = 6,
 };
 
 #pragma pack(push, 1)
@@ -117,10 +117,10 @@ public:
 enum HWBlendFlags
 {
 	// A couple of flag to determine the blending behavior
-	BLEND_A_MAX  = 0x100, // Impossible blending uses coeff bigger than 1
-	BLEND_C_CLR  = 0x200, // Clear color blending (use directly the destination color as blending factor)
+	BLEND_A_MAX = 0x100, // Impossible blending uses coeff bigger than 1
+	BLEND_C_CLR = 0x200, // Clear color blending (use directly the destination color as blending factor)
 	BLEND_NO_REC = 0x400, // Doesn't require sampling of the RT as a texture
-	BLEND_ACCU   = 0x800, // Allow to use a mix of SW and HW blending to keep the best of the 2 worlds
+	BLEND_ACCU = 0x800, // Allow to use a mix of SW and HW blending to keep the best of the 2 worlds
 };
 
 // Determines the HW blend function for DX11/OGL
@@ -133,19 +133,33 @@ class GSDevice : public GSAlignedClass<32>
 {
 private:
 	FastList<GSTexture*> m_pool;
-	static std::array<HWBlend, 3*3*3*3 + 1> m_blendMap;
+	static std::array<HWBlend, 3 * 3 * 3 * 3 + 1> m_blendMap;
 
 protected:
 	enum : uint16
 	{
 		// HW blend factors
-		SRC_COLOR,   INV_SRC_COLOR,    DST_COLOR,  INV_DST_COLOR,
-		SRC1_COLOR,  INV_SRC1_COLOR,   SRC_ALPHA,  INV_SRC_ALPHA,
-		DST_ALPHA,   INV_DST_ALPHA,    SRC1_ALPHA, INV_SRC1_ALPHA,
-		CONST_COLOR, INV_CONST_COLOR,  CONST_ONE,  CONST_ZERO,
+		SRC_COLOR,
+		INV_SRC_COLOR,
+		DST_COLOR,
+		INV_DST_COLOR,
+		SRC1_COLOR,
+		INV_SRC1_COLOR,
+		SRC_ALPHA,
+		INV_SRC_ALPHA,
+		DST_ALPHA,
+		INV_DST_ALPHA,
+		SRC1_ALPHA,
+		INV_SRC1_ALPHA,
+		CONST_COLOR,
+		INV_CONST_COLOR,
+		CONST_ONE,
+		CONST_ZERO,
 
 		// HW blend operations
-		OP_ADD, OP_SUBTRACT, OP_REV_SUBTRACT
+		OP_ADD,
+		OP_SUBTRACT,
+		OP_REV_SUBTRACT
 	};
 
 	static const int m_NO_BLEND = 0;
@@ -206,7 +220,7 @@ public:
 	virtual void SetVSync(int vsync) { m_vsync = vsync; }
 
 	virtual void BeginScene() {}
-	virtual void DrawPrimitive() {};
+	virtual void DrawPrimitive(){};
 	virtual void DrawIndexedPrimitive() {}
 	virtual void DrawIndexedPrimitive(int offset, int count) {}
 	virtual void EndScene();
@@ -245,7 +259,7 @@ public:
 	void FXAA();
 	void ShadeBoost();
 	void ExternalFX();
-	virtual void RenderOsd(GSTexture* dt) {};
+	virtual void RenderOsd(GSTexture* dt){};
 
 	bool ResizeTexture(GSTexture** t, int type, int w, int h);
 	bool ResizeTexture(GSTexture** t, int w, int h);
@@ -276,11 +290,11 @@ struct GSAdapter
 	bool operator==(const GSAdapter&) const;
 	bool operator==(const std::string& s) const
 	{
-		return (std::string)*this == s;
+		return (std::string) * this == s;
 	}
 	bool operator==(const char* s) const
 	{
-		return (std::string)*this == s;
+		return (std::string) * this == s;
 	}
 
 #ifdef _WIN32

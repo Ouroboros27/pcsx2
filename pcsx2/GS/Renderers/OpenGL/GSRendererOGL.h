@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Renderers/HW/GSRendererHW.h"
+#include "../HW/GSRendererHW.h"
 #include "GSTextureCacheOGL.h"
-#include "Renderers/HW/GSVertexHW.h"
+#include "../HW/GSVertexHW.h"
 
 class GSRendererOGL final : public GSRendererHW
 {
@@ -36,12 +36,12 @@ class GSRendererOGL final : public GSRendererHW
 
 	enum ACC_BLEND
 	{
-		ACC_BLEND_NONE   = 0,
-		ACC_BLEND_BASIC  = 1,
+		ACC_BLEND_NONE = 0,
+		ACC_BLEND_BASIC = 1,
 		ACC_BLEND_MEDIUM = 2,
-		ACC_BLEND_HIGH   = 3,
-		ACC_BLEND_FULL   = 4,
-		ACC_BLEND_ULTRA  = 5
+		ACC_BLEND_HIGH = 3,
+		ACC_BLEND_FULL = 4,
+		ACC_BLEND_ULTRA = 5
 	};
 
 private:
@@ -60,8 +60,8 @@ private:
 	GSDeviceOGL::GSSelector m_gs_sel;
 	GSDeviceOGL::PSSelector m_ps_sel;
 
-	GSDeviceOGL::PSSamplerSelector      m_ps_ssel;
-	GSDeviceOGL::OMColorMaskSelector    m_om_csel;
+	GSDeviceOGL::PSSamplerSelector m_ps_ssel;
+	GSDeviceOGL::OMColorMaskSelector m_om_csel;
 	GSDeviceOGL::OMDepthStencilSelector m_om_dssel;
 
 private:

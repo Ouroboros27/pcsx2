@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "GSDrawingContext.h"
+#include "../../GSDrawingContext.h"
 #include "GSVertex.h"
-#include "Renderers/SW/GSVertexSW.h"
-#include "Renderers/HW/GSVertexHW.h"
+#include "../SW/GSVertexSW.h"
+#include "../HW/GSVertexHW.h"
 #include "GSFunctionMap.h"
 
 class GSState;
@@ -68,13 +68,22 @@ public:
 	union
 	{
 		uint32 value;
-		struct { uint32 r:4, g:4, b:4, a:4, x:1, y:1, z:1, f:1, s:1, t:1, q:1, _pad:1; };
-		struct { uint32 rgba:16, xyzf:4, stq:4; };
+		struct
+		{
+			uint32 r : 4, g : 4, b : 4, a : 4, x : 1, y : 1, z : 1, f : 1, s : 1, t : 1, q : 1, _pad : 1;
+		};
+		struct
+		{
+			uint32 rgba : 16, xyzf : 4, stq : 4;
+		};
 	} m_eq;
 
 	union
 	{
-		struct { uint32 mmag:1, mmin:1, linear:1, opt_linear:1; };
+		struct
+		{
+			uint32 mmag : 1, mmin : 1, linear : 1, opt_linear : 1;
+		};
 	} m_filter;
 
 	GSVector2 m_lod; // x = min, y = max

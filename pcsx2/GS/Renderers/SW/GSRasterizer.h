@@ -22,11 +22,11 @@
 #pragma once
 
 #include "GS.h"
-#include "Renderers/SW/GSVertexSW.h"
-#include "Renderers/Common/GSFunctionMap.h"
-#include "GSAlignedClass.h"
-#include "GSPerfMon.h"
-#include "GSThread_CXX11.h"
+#include "GSVertexSW.h"
+#include "../Common/GSFunctionMap.h"
+#include "../../GSAlignedClass.h"
+#include "../../GSPerfMon.h"
+#include "../../GSThread_CXX11.h"
 
 class alignas(32) GSRasterizerData : public GSAlignedClass<32>
 {
@@ -97,7 +97,10 @@ public:
 
 #ifdef ENABLE_JIT_RASTERIZER
 
-	__forceinline void SetupPrim(const GSVertexSW* vertex, const uint32* index, const GSVertexSW& dscan) { m_sp(vertex, index, dscan); }
+	__forceinline void SetupPrim(const GSVertexSW* vertex, const uint32* index, const GSVertexSW& dscan)
+	{
+		m_sp(vertex, index, dscan);
+	}
 	__forceinline void DrawScanline(int pixels, int left, int top, const GSVertexSW& scan) { m_ds(pixels, left, top, scan); }
 	__forceinline void DrawEdge(int pixels, int left, int top, const GSVertexSW& scan) { m_de(pixels, left, top, scan); }
 	__forceinline void DrawRect(const GSVector4i& r, const GSVertexSW& v) { (this->*m_dr)(r, v); }
@@ -141,8 +144,15 @@ protected:
 	GSVector4i m_scissor;
 	GSVector4 m_fscissor_x;
 	GSVector4 m_fscissor_y;
-	struct { GSVertexSW* buff; int count; } m_edge;
-	struct { int sum, actual, total; } m_pixels;
+	struct
+	{
+		GSVertexSW* buff;
+		int count;
+	} m_edge;
+	struct
+	{
+		int sum, actual, total;
+	} m_pixels;
 
 	typedef void (GSRasterizer::*DrawPrimPtr)(const GSVertexSW* v, int count);
 

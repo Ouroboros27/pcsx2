@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "config.h"
+#include "../../config.h"
 
 #ifdef ENABLE_OGL_DEBUG_MEM_BW
 extern uint64 g_vertex_upload_byte;
@@ -240,7 +240,8 @@ class GSVertexBufferStateOGL
 
 public:
 	GSVertexBufferStateOGL(const std::vector<GSInputLayoutOGL>& layout)
-		: m_topology(0), m_layout(layout)
+		: m_topology(0)
+		, m_layout(layout)
 	{
 		glGenVertexArrays(1, &m_va);
 		glBindVertexArray(m_va);

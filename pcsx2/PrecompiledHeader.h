@@ -18,13 +18,13 @@
 
 // Disable some pointless warnings...
 #ifdef _MSC_VER
-#	pragma warning(disable:4250) //'class' inherits 'method' via dominance
-#	pragma warning(disable:4996) //ignore the stricmp deprecated warning
+#pragma warning(disable : 4250) //'class' inherits 'method' via dominance
+#pragma warning(disable : 4996) //ignore the stricmp deprecated warning
 #endif
 
 #include "Utilities/Dependencies.h"
 
-#define NOMINMAX		// Disables other libs inclusion of their own min/max macros (we use std instead)
+#define NOMINMAX // Disables other libs inclusion of their own min/max macros (we use std instead)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Welcome wxWidgets to the party!
@@ -42,10 +42,10 @@
 #include <vector>
 #include <list>
 #include <stack>
-#include <cstring>		// string.h under c++
-#include <cstdio>		// stdio.h under c++
+#include <cstring> // string.h under c++
+#include <cstdio> // stdio.h under c++
 #include <cstdlib>
-#include <cinttypes>	// Printf format
+#include <cinttypes> // Printf format
 
 // ... and include some ANSI/POSIX C libs that are useful too, just for good measure.
 // (these compile lightning fast with or without PCH, but they never change so
@@ -59,9 +59,9 @@
 // As plugins which use C have to be used with PCSX2, the BOOL type is redefined
 // to prevent any C/C++ compatibility issues.
 typedef int BOOL;
-#undef  TRUE
-#undef  FALSE
-#define TRUE  1
+#undef TRUE
+#undef FALSE
+#define TRUE 1
 #define FALSE 0
 
 
@@ -87,15 +87,15 @@ typedef void FnType_Void();
 typedef FnType_Void* Fnptr_Void;
 
 // --------------------------------------------------------------------------------------
-//  Compiler/OS specific macros and defines 
+//  Compiler/OS specific macros and defines
 // --------------------------------------------------------------------------------------
 
 #if defined(_MSC_VER)
 
-#	define strnicmp _strnicmp
-#	define stricmp _stricmp
+#define strnicmp _strnicmp
+#define stricmp _stricmp
 
-#else	// must be GCC or Clang
+#else // must be GCC or Clang
 
 #include <sys/types.h>
 

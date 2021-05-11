@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "GSState.h"
+#include "../../GSState.h"
 #include "GSRasterizer.h"
 #include "GSScanlineEnvironment.h"
 #include "GSSetupPrimCodeGenerator.h"
@@ -81,8 +81,10 @@ public:
 	bool IsEdge() const { return m_global.sel.aa1; }
 	bool IsRect() const { return m_global.sel.IsSolidRect(); }
 
-	template<class T> bool TestAlpha(T& test, T& fm, T& zm, const T& ga);
-	template<class T> void WritePixel(const T& src, int addr, int i, uint32 psm);
+	template <class T>
+	bool TestAlpha(T& test, T& fm, T& zm, const T& ga);
+	template <class T>
+	void WritePixel(const T& src, int addr, int i, uint32 psm);
 
 #endif
 

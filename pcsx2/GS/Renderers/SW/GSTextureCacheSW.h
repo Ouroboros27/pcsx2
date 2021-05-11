@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "Renderers/Common/GSRenderer.h"
-#include "Renderers/Common/GSFastList.h"
+#include "../Common/GSRenderer.h"
+#include "../Common/GSFastList.h"
 
 class GSTextureCacheSW
 {
@@ -42,7 +42,11 @@ public:
 		std::vector<GSVector2i>* m_p2t;
 		uint32 m_valid[MAX_PAGES];
 		std::array<uint16, MAX_PAGES> m_erase_it;
-		struct { uint32 bm[16]; const uint32* n; } m_pages;
+		struct
+		{
+			uint32 bm[16];
+			const uint32* n;
+		} m_pages;
 		const uint32* RESTRICT m_sharedbits;
 
 		// m_valid

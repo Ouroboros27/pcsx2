@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include "GS.h"
-#include "GSCodeBuffer.h"
+#include "../../GS.h"
+#include "../../GSCodeBuffer.h"
 #include "xbyak/xbyak.h"
 #include "xbyak/xbyak_util.h"
 
-#include "Renderers/SW/GSScanlineEnvironment.h"
+#include "../SW/GSScanlineEnvironment.h"
 
 template <class KEY, class VALUE>
 class GSFunctionMap
@@ -165,7 +165,10 @@ class GSCodeGeneratorFunctionMap : public GSFunctionMap<KEY, VALUE>
 	GSCodeBuffer m_cb;
 	size_t m_total_code_size;
 
-	enum { MAX_SIZE = 8192 };
+	enum
+	{
+		MAX_SIZE = 8192
+	};
 
 public:
 	GSCodeGeneratorFunctionMap(const char* name, void* param)
@@ -231,7 +234,7 @@ public:
 				ml.method_size = (unsigned int)cg->getSize();
 
 				iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, &ml);
-/*
+				/*
 				name = format("c:/temp1/%s_%016llx.bin", m_name.c_str(), (uint64)key);
 
 				if(FILE* fp = fopen(name.c_str(), "wb"))
