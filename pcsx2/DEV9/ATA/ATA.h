@@ -23,15 +23,12 @@
 #include "ghc/filesystem.h"
 #include <fstream>
 
-#include "PS2Edefs.h"
-#include "PS2Eext.h"
-
 class ATA
 {
 public:
 	//Transfer
 	bool dmaReady = false;
-	int nsector = 0;     //sector count
+	int nsector = 0; //sector count
 	int nsectorLeft = 0; //sectors left to transfer
 private:
 	const bool lba48Supported = false;

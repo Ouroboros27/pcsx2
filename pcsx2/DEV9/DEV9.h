@@ -25,8 +25,6 @@
 //#define WINVER 0x0600
 //#define _WIN32_WINNT 0x0500
 
-#include "PS2Edefs.h"
-#include "PS2Eext.h"
 #include "net.h"
 #include "ATA/ATA.h"
 
@@ -672,7 +670,7 @@ typedef struct
 {
 	u32 id;
 	u32 mbits;
-	u32 page_bytes;  /* bytes/page */
+	u32 page_bytes; /* bytes/page */
 	u32 block_pages; /* pages/block */
 	u32 blocks;
 } flash_info_t;
@@ -696,10 +694,10 @@ static flash_info_t devices[] = {
 #define FLASH_R_CMD (FLASH_REGBASE + 0x04)
 #define FLASH_R_ADDR (FLASH_REGBASE + 0x08)
 #define FLASH_R_CTRL (FLASH_REGBASE + 0x0C)
-#define FLASH_PP_READY (1 << 0)  // r/w	/BUSY
-#define FLASH_PP_WRITE (1 << 7)  // -/w	WRITE data
-#define FLASH_PP_CSEL (1 << 8)   // -/w	CS
-#define FLASH_PP_READ (1 << 11)  // -/w	READ data
+#define FLASH_PP_READY (1 << 0) // r/w	/BUSY
+#define FLASH_PP_WRITE (1 << 7) // -/w	WRITE data
+#define FLASH_PP_CSEL (1 << 8) // -/w	CS
+#define FLASH_PP_READ (1 << 11) // -/w	READ data
 #define FLASH_PP_NOECC (1 << 12) // -/w	ECC disabled
 //#define FLASH_R_10		(FLASH_REGBASE + 0x10)
 #define FLASH_R_ID (FLASH_REGBASE + 0x14)
