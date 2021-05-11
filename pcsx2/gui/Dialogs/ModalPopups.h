@@ -97,7 +97,6 @@ protected:
 	wxWizardPageSimple& m_page_bios;
 
 	wxPanelWithHelpers& m_panel_Intro;
-	Panels::PluginSelectorPanel& m_panel_PluginSel;
 	Panels::BiosSelectorPanel& m_panel_BiosSel;
 
 public:
@@ -105,11 +104,6 @@ public:
 	virtual ~FirstTimeWizard() = default;
 
 	wxWizardPage* GetFirstPage() const { return &m_page_intro; }
-
-	void ForceEnumPlugins()
-	{
-		m_panel_PluginSel.OnShown();
-	}
 
 	int ShowModal();
 
@@ -200,8 +194,7 @@ namespace Dialogs
 			"Transfer",
 			"VSync",
 			"ReadFIFO2",
-			"Registers"
-		};
+			"Registers"};
 		enum GSTransferPath : u8
 		{
 			Path1Old = 0,
@@ -228,8 +221,7 @@ namespace Dialogs
 			"Path2",
 			"Path3",
 			"Path1New",
-			"Dummy"
-		};
+			"Dummy"};
 		enum GifFlag : u8
 		{
 			GIF_FLG_PACKED = 0,
@@ -241,8 +233,7 @@ namespace Dialogs
 			"GIF_FLG_PACKED",
 			"GIF_FLG_REGLIST",
 			"GIF_FLG_IMAGE",
-			"GIF_FLG_IMAGE2"
-		};
+			"GIF_FLG_IMAGE2"};
 		static constexpr const char* GsPrimNames[256] = {
 			"GS_POINTLIST",
 			"GS_LINELIST",
@@ -251,40 +242,32 @@ namespace Dialogs
 			"GS_TRIANGLESTRIP",
 			"GS_TRIANGLEFAN",
 			"GS_SPRITE",
-			"GS_INVALID"
-		};
+			"GS_INVALID"};
 		static constexpr const char* GsIIPNames[256] = {
 			"FlatShading",
-			"Gouraud"
-		};
+			"Gouraud"};
 		static constexpr const char* GsFSTNames[256] = {
 			"STQValue",
-			"UVValue"
-		};
+			"UVValue"};
 		static constexpr const char* GsCTXTNames[256] = {
 			"Context1",
-			"Context2"
-		};
+			"Context2"};
 		static constexpr const char* GsFIXNames[256] = {
 			"Unfixed",
-			"Fixed"
-		};
+			"Fixed"};
 		static constexpr const char* TEXTCCNames[256] = {
 			"RGB",
-			"RGBA"
-		};
+			"RGBA"};
 		static constexpr const char* TEXTFXNames[256] = {
 			"MODULATE",
 			"DECAL",
 			"HIGHLIGHT",
-			"HIGHLIGHT2"
-		};
+			"HIGHLIGHT2"};
 		static constexpr const char* TEXCSMNames[256] = {
 			"CSM1",
-			"CSM2"
-		};
-		// a GNU extension exists to initialize array at given indices which would be 
-		// exactly what we need here but, obviously, MSVC is at it again to make our 
+			"CSM2"};
+		// a GNU extension exists to initialize array at given indices which would be
+		// exactly what we need here but, obviously, MSVC is at it again to make our
 		// life harder than sandpaper on your skin, so we make do
 		// clang-format off
 		static constexpr const char* TEXCPSMNames[256] = {
@@ -327,7 +310,7 @@ namespace Dialogs
 		};
 		constexpr auto GIFRegName(GSDUMP_GIFREG_NAME e) noexcept
 		{
-#define X(name, value)               \
+#define X(name, value) \
 	case (GSDUMP_GIFREG_NAME::name): \
 		return #name;
 			switch (e)
