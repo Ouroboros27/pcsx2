@@ -15,7 +15,12 @@
 
 #pragma once
 
+#define FREEZE_LOAD 0
+#define FREEZE_SAVE 1
+#define FREEZE_SIZE 2
+
 #include "System.h"
+#include "Utilities/Exceptions.h"
 
 // Savestate Versioning!
 //  If you make changes to the savestate version, please increment the value below.
@@ -33,14 +38,13 @@ static const u32 g_SaveVersion = (0x9A1E << 16) | 0x0000;
 // necessarily portable; we might want to investigate this in the future -- govanify
 typedef struct
 {
-    int size;
-    s8 *data;
+	int size;
+	s8* data;
 } freezeData;
 
 // this function is meant to be used in the place of GSfreeze, and provides a safe layer
 // between the GS saving function and the MTGS's needs. :)
-extern s32 CALLBACK gsSafeFreeze( int mode, freezeData *data );
-
+extern s32 CALLBACK gsSafeFreeze(int mode, freezeData* data);
 
 // --------------------------------------------------------------------------------------
 //  SaveStateBase class
@@ -54,16 +58,16 @@ protected:
 	VmStateBuffer* m_memory;
 	char m_tagspace[32];
 
-	u32 m_version;		// version of the savestate being loaded.
+	u32 m_version; // version of the savestate being loaded.
 
-	int m_idx;			// current read/write index of the allocation
+	int m_idx; // current read/write index of the allocation
 
 public:
-	SaveStateBase( VmStateBuffer& memblock );
-	SaveStateBase( VmStateBuffer* memblock );
-	virtual ~SaveStateBase() { }
+	SaveStateBase(VmStateBuffer& memblock);
+	SaveStateBase(VmStateBuffer* memblock);
+	virtual ~SaveStateBase() {}
 
-	static wxString GetFilename( int slot );
+	static wxString GetFilename(int slot);
 
 	// Gets the version of savestate that this object is acting on.
 	// The version refers to the low 16 bits only (high 16 bits classifies Pcsx2 build types)
@@ -84,21 +88,21 @@ public:
 
 	// Loads or saves an arbitrary data type.  Usable on atomic types, structs, and arrays.
 	// For dynamically allocated pointers use FreezeMem instead.
-	template<typename T>
-	void Freeze( T& data )
+	template <typename T>
+	void Freeze(T& data)
 	{
-		FreezeMem( const_cast<void*>((void*)&data), sizeof( T ) );
+		FreezeMem(const_cast<void*>((void*)&data), sizeof(T));
 	}
 
 	// FreezeLegacy can be used to load structures short of their full size, which is
 	// useful for loading structures that have had new stuff added since a previous version.
-	template<typename T>
-	void FreezeLegacy( T& data, int sizeOfNewStuff )
+	template <typename T>
+	void FreezeLegacy(T& data, int sizeOfNewStuff)
 	{
-		FreezeMem( &data, sizeof( T ) - sizeOfNewStuff );
+		FreezeMem(&data, sizeof(T) - sizeOfNewStuff);
 	}
 
-	void PrepBlock( int size );
+	void PrepBlock(int size);
 
 	uint GetCurrentPos() const
 	{
@@ -109,13 +113,13 @@ public:
 	{
 		return m_memory->GetPtr(m_idx);
 	}
-	
+
 	u8* GetPtrEnd() const
 	{
 		return m_memory->GetPtrEnd();
 	}
 
-	void CommitBlock( int size )
+	void CommitBlock(int size)
 	{
 		m_idx += size;
 	}
@@ -124,23 +128,23 @@ public:
 	// Identifiers can be used to determine where in a savestate that data has become
 	// skewed (if the value does not match then the error occurs somewhere prior to that
 	// position).
-	void FreezeTag( const char* src );
+	void FreezeTag(const char* src);
 
 	// Returns true if this object is a StateLoading type object.
 	bool IsLoading() const { return !IsSaving(); }
 
 	// Loads or saves a memory block.
-	virtual void FreezeMem( void* data, int size )=0;
+	virtual void FreezeMem(void* data, int size) = 0;
 
 	// Returns true if this object is a StateSaving type object.
-	virtual bool IsSaving() const=0;
+	virtual bool IsSaving() const = 0;
 
 public:
 	// note: gsFreeze() needs to be public because of the GSState recorder.
 	void gsFreeze();
 
 protected:
-	void Init( VmStateBuffer* memblock );
+	void Init(VmStateBuffer* memblock);
 
 	// Load/Save functions for the various components of our glorious emulator!
 
@@ -183,17 +187,17 @@ class memSavingState : public SaveStateBase
 	typedef SaveStateBase _parent;
 
 protected:
-	static const int ReallocThreshold		= _1mb / 4;		// 256k reallocation block size.
-	static const int MemoryBaseAllocSize	= _8mb;			// 8 meg base alloc when PS2 main memory is excluded
+	static const int ReallocThreshold = _1mb / 4; // 256k reallocation block size.
+	static const int MemoryBaseAllocSize = _8mb; // 8 meg base alloc when PS2 main memory is excluded
 
 public:
 	virtual ~memSavingState() = default;
-	memSavingState( VmStateBuffer& save_to );
-	memSavingState( VmStateBuffer* save_to );
+	memSavingState(VmStateBuffer& save_to);
+	memSavingState(VmStateBuffer* save_to);
 
 	void MakeRoomForData();
 
-	void FreezeMem( void* data, int size );
+	void FreezeMem(void* data, int size);
 	memSavingState& FreezeAll();
 
 	bool IsSaving() const { return true; }
@@ -204,12 +208,25 @@ class memLoadingState : public SaveStateBase
 public:
 	virtual ~memLoadingState() = default;
 
-	memLoadingState( const VmStateBuffer& load_from );
-	memLoadingState( const VmStateBuffer* load_from );
+	memLoadingState(const VmStateBuffer& load_from);
+	memLoadingState(const VmStateBuffer* load_from);
 
-	void FreezeMem( void* data, int size );
+	void FreezeMem(void* data, int size);
 
 	bool IsSaving() const { return false; }
 	bool IsFinished() const { return m_idx >= m_memory->GetSizeInBytes(); }
 };
+
+
+namespace Exception
+{
+	// Exception thrown when a corrupted or truncated savestate is encountered.
+	class SaveStateLoadError : public BadStream
+	{
+		DEFINE_STREAM_EXCEPTION(SaveStateLoadError, BadStream)
+
+		virtual wxString FormatDiagnosticMessage() const;
+		virtual wxString FormatDisplayMessage() const;
+	};
+}; // namespace Exception
 

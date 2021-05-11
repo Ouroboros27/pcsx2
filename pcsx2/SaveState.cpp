@@ -30,6 +30,7 @@
 
 #include "Utilities/SafeArray.inl"
 #include "SPU2/spu2.h"
+#include "gui/ConsoleLogger.h"
 
 using namespace R5900;
 
@@ -42,9 +43,11 @@ static void PreLoadPrep()
 static void PostLoadPrep()
 {
 	resetCache();
-//	WriteCP0Status(cpuRegs.CP0.n.Status.val);
-	for(int i=0; i<48; i++) MapTLB(i);
-	if (EmuConfig.Gamefixes.GoemonTlbHack) GoemonPreloadTlb();
+	//	WriteCP0Status(cpuRegs.CP0.n.Status.val);
+	for (int i = 0; i < 48; i++)
+		MapTLB(i);
+	if (EmuConfig.Gamefixes.GoemonTlbHack)
+		GoemonPreloadTlb();
 
 	UpdateVSyncRate();
 }
@@ -52,125 +55,128 @@ static void PostLoadPrep()
 // --------------------------------------------------------------------------------------
 //  SaveStateBase  (implementations)
 // --------------------------------------------------------------------------------------
-wxString SaveStateBase::GetFilename( int slot )
+wxString SaveStateBase::GetFilename(int slot)
 {
-	wxString serialName( DiscSerial );
-	if (serialName.IsEmpty()) serialName = L"BIOS";
+	wxString serialName(DiscSerial);
+	if (serialName.IsEmpty())
+		serialName = L"BIOS";
 
 	return (g_Conf->Folders.Savestates +
-		pxsFmt( L"%s (%08X).%02d.p2s", WX_STR(serialName), ElfCRC, slot )).GetFullPath();
+			pxsFmt(L"%s (%08X).%02d.p2s", WX_STR(serialName), ElfCRC, slot))
+		.GetFullPath();
 
 	//return (g_Conf->Folders.Savestates +
 	//	pxsFmt( L"%08X.%03d", ElfCRC, slot )).GetFullPath();
 }
 
-SaveStateBase::SaveStateBase( SafeArray<u8>& memblock )
+SaveStateBase::SaveStateBase(SafeArray<u8>& memblock)
 {
-	Init( &memblock );
+	Init(&memblock);
 }
 
-SaveStateBase::SaveStateBase( SafeArray<u8>* memblock )
+SaveStateBase::SaveStateBase(SafeArray<u8>* memblock)
 {
-	Init( memblock );
+	Init(memblock);
 }
 
-void SaveStateBase::Init( SafeArray<u8>* memblock )
+void SaveStateBase::Init(SafeArray<u8>* memblock)
 {
-	m_memory	= memblock;
-	m_version	= g_SaveVersion;
-	m_idx		= 0;
+	m_memory = memblock;
+	m_version = g_SaveVersion;
+	m_idx = 0;
 }
 
-void SaveStateBase::PrepBlock( int size )
+void SaveStateBase::PrepBlock(int size)
 {
-	pxAssertDev( m_memory, "Savestate memory/buffer pointer is null!" );
+	pxAssertDev(m_memory, "Savestate memory/buffer pointer is null!");
 
-	const int end = m_idx+size;
-	if( IsSaving() )
-		m_memory->MakeRoomFor( end );
+	const int end = m_idx + size;
+	if (IsSaving())
+		m_memory->MakeRoomFor(end);
 	else
 	{
-		if( m_memory->GetSizeInBytes() < end )
+		if (m_memory->GetSizeInBytes() < end)
 			throw Exception::SaveStateLoadError();
 	}
 }
 
-void SaveStateBase::FreezeTag( const char* src )
+void SaveStateBase::FreezeTag(const char* src)
 {
-	const uint allowedlen = sizeof( m_tagspace )-1;
-	pxAssertDev( strlen(src) < allowedlen, pxsFmt( L"Tag name exceeds the allowed length of %d chars.", allowedlen) );
+	const uint allowedlen = sizeof(m_tagspace) - 1;
+	pxAssertDev(strlen(src) < allowedlen, pxsFmt(L"Tag name exceeds the allowed length of %d chars.", allowedlen));
 
-	memzero( m_tagspace );
-	strcpy( m_tagspace, src );
-	Freeze( m_tagspace );
+	memzero(m_tagspace);
+	strcpy(m_tagspace, src);
+	Freeze(m_tagspace);
 
-	if( strcmp( m_tagspace, src ) != 0 )
+	if (strcmp(m_tagspace, src) != 0)
 	{
-		wxString msg( L"Savestate data corruption detected while reading tag: " + fromUTF8(src) );
-		pxFail( msg );
+		wxString msg(L"Savestate data corruption detected while reading tag: " + fromUTF8(src));
+		pxFail(msg);
 		throw Exception::SaveStateLoadError().SetDiagMsg(msg);
 	}
 }
 
 SaveStateBase& SaveStateBase::FreezeBios()
 {
-	FreezeTag( "BIOS" );
+	FreezeTag("BIOS");
 
 	// Check the BIOS, and issue a warning if the bios for this state
 	// doesn't match the bios currently being used (chances are it'll still
 	// work fine, but some games are very picky).
-	
+
 	u32 bioscheck = BiosChecksum;
 	char biosdesc[256];
 
 	pxToUTF8 utf8(BiosDescription);
 
-	memzero( biosdesc );
-	memcpy( biosdesc, utf8, std::min( sizeof(biosdesc), utf8.Length() ) );
-	
-	Freeze( bioscheck );
-	Freeze( biosdesc );
+	memzero(biosdesc);
+	memcpy(biosdesc, utf8, std::min(sizeof(biosdesc), utf8.Length()));
+
+	Freeze(bioscheck);
+	Freeze(biosdesc);
 
 	if (bioscheck != BiosChecksum)
 	{
 		Console.Newline();
-		Console.Indent(1).Error( "Warning: BIOS Version Mismatch, savestate may be unstable!" );
+		Console.Indent(1).Error("Warning: BIOS Version Mismatch, savestate may be unstable!");
 		Console.Indent(2).Error(
 			"Current BIOS:   %ls (crc=0x%08x)\n"
 			"Savestate BIOS: %s (crc=0x%08x)\n",
 			BiosDescription.wx_str(), BiosChecksum,
-			biosdesc, bioscheck
-		);
+			biosdesc, bioscheck);
 	}
-	
+
 	return *this;
 }
 
 static const uint MainMemorySizeInBytes =
-	Ps2MemSize::MainRam	+ Ps2MemSize::Scratch		+ Ps2MemSize::Hardware +
-	Ps2MemSize::IopRam	+ Ps2MemSize::IopHardware;
+	Ps2MemSize::MainRam + Ps2MemSize::Scratch + Ps2MemSize::Hardware +
+	Ps2MemSize::IopRam + Ps2MemSize::IopHardware;
 
 SaveStateBase& SaveStateBase::FreezeMainMemory()
 {
 	vu1Thread.WaitVU(); // Finish VU1 just in-case...
-	if (IsLoading()) PreLoadPrep();
-	else m_memory->MakeRoomFor( m_idx + MainMemorySizeInBytes );
+	if (IsLoading())
+		PreLoadPrep();
+	else
+		m_memory->MakeRoomFor(m_idx + MainMemorySizeInBytes);
 
 	// First Block - Memory Dumps
 	// ---------------------------
-	FreezeMem(eeMem->Main,		Ps2MemSize::MainRam);		// 32 MB main memory
-	FreezeMem(eeMem->Scratch,	Ps2MemSize::Scratch);		// scratch pad
-	FreezeMem(eeHw,				Ps2MemSize::Hardware);		// hardware memory
+	FreezeMem(eeMem->Main, Ps2MemSize::MainRam); // 32 MB main memory
+	FreezeMem(eeMem->Scratch, Ps2MemSize::Scratch); // scratch pad
+	FreezeMem(eeHw, Ps2MemSize::Hardware); // hardware memory
 
-	FreezeMem(iopMem->Main, 	Ps2MemSize::IopRam);		// 2 MB main memory
-	FreezeMem(iopHw,			Ps2MemSize::IopHardware);	// hardware memory
-	
-	FreezeMem(vuRegs[0].Micro,	VU0_PROGSIZE);
-	FreezeMem(vuRegs[0].Mem,	VU0_MEMSIZE);
+	FreezeMem(iopMem->Main, Ps2MemSize::IopRam); // 2 MB main memory
+	FreezeMem(iopHw, Ps2MemSize::IopHardware); // hardware memory
 
-	FreezeMem(vuRegs[1].Micro,	VU1_PROGSIZE);
-	FreezeMem(vuRegs[1].Mem,	VU1_MEMSIZE);
-	
+	FreezeMem(vuRegs[0].Micro, VU0_PROGSIZE);
+	FreezeMem(vuRegs[0].Mem, VU0_MEMSIZE);
+
+	FreezeMem(vuRegs[1].Micro, VU1_PROGSIZE);
+	FreezeMem(vuRegs[1].Mem, VU1_MEMSIZE);
+
 	return *this;
 }
 
@@ -178,21 +184,23 @@ SaveStateBase& SaveStateBase::FreezeInternals()
 {
 	vu1Thread.WaitVU(); // Finish VU1 just in-case...
 	// Print this until the MTVU problem in gifPathFreeze is taken care of (rama)
-	if (THREAD_VU1) Console.Warning("MTVU speedhack is enabled, saved states may not be stable");
-	
-	if (IsLoading()) PreLoadPrep();
+	if (THREAD_VU1)
+		Console.Warning("MTVU speedhack is enabled, saved states may not be stable");
+
+	if (IsLoading())
+		PreLoadPrep();
 
 	// Second Block - Various CPU Registers and States
 	// -----------------------------------------------
-	FreezeTag( "cpuRegs" );
-	Freeze(cpuRegs);		// cpu regs + COP0
-	Freeze(psxRegs);		// iop regs
+	FreezeTag("cpuRegs");
+	Freeze(cpuRegs); // cpu regs + COP0
+	Freeze(psxRegs); // iop regs
 	Freeze(fpuRegs);
-	Freeze(tlb);			// tlbs
+	Freeze(tlb); // tlbs
 
 	// Third Block - Cycle Timers and Events
 	// -------------------------------------
-	FreezeTag( "Cycles" );
+	FreezeTag("Cycles");
 	Freeze(EEsCycle);
 	Freeze(EEoCycle);
 	Freeze(g_nextEventCycle);
@@ -202,7 +210,7 @@ SaveStateBase& SaveStateBase::FreezeInternals()
 
 	// Fourth Block - EE-related systems
 	// ---------------------------------
-	FreezeTag( "EE-Subsystems" );
+	FreezeTag("EE-Subsystems");
 	rcntFreeze();
 	gsFreeze();
 	vuMicroFreeze();
@@ -218,8 +226,8 @@ SaveStateBase& SaveStateBase::FreezeInternals()
 
 	// Fifth Block - iop-related systems
 	// ---------------------------------
-	FreezeTag( "IOP-Subsystems" );
-	FreezeMem(iopMem->Sif, sizeof(iopMem->Sif));		// iop's sif memory (not really needed, but oh well)
+	FreezeTag("IOP-Subsystems");
+	FreezeMem(iopMem->Sif, sizeof(iopMem->Sif)); // iop's sif memory (not really needed, but oh well)
 
 	psxRcntFreeze();
 	sioFreeze();
@@ -227,26 +235,16 @@ SaveStateBase& SaveStateBase::FreezeInternals()
 	cdrFreeze();
 	cdvdFreeze();
 
-	
+
 	// technically this is HLE BIOS territory, but we don't have enough such stuff
 	// to merit an HLE Bios sub-section... yet.
 	deci2Freeze();
 
 	InputRecordingFreeze();
 
-	if( IsLoading() )
+	if (IsLoading())
 		PostLoadPrep();
-		
-	return *this;
-}
 
-SaveStateBase& SaveStateBase::FreezePlugins()
-{
-	for (uint i=0; i<PluginId_Count; ++i)
-	{
-		FreezeTag( FastFormatAscii().Write("Plugin:%s", tbl_PluginInfo[i].shortname) );
-		GetCorePlugins().Freeze( (PluginsEnum_t)i, *this );
-	}
 	return *this;
 }
 
@@ -255,9 +253,8 @@ SaveStateBase& SaveStateBase::FreezeAll()
 	FreezeMainMemory();
 	FreezeBios();
 	FreezeInternals();
-	FreezePlugins();
+	//TODO: ADD BACK FREEZE PLUGINS HERE
 
-	
 	return *this;
 }
 
@@ -267,32 +264,33 @@ SaveStateBase& SaveStateBase::FreezeAll()
 // --------------------------------------------------------------------------------------
 // uncompressed to/from memory state saves implementation
 
-memSavingState::memSavingState( SafeArray<u8>& save_to )
-	: SaveStateBase( save_to )
+memSavingState::memSavingState(SafeArray<u8>& save_to)
+	: SaveStateBase(save_to)
 {
 }
 
-memSavingState::memSavingState( SafeArray<u8>* save_to )
-	: SaveStateBase( save_to )
+memSavingState::memSavingState(SafeArray<u8>* save_to)
+	: SaveStateBase(save_to)
 {
 }
 
 // Saving of state data
-void memSavingState::FreezeMem( void* data, int size )
+void memSavingState::FreezeMem(void* data, int size)
 {
-	if (!size) return;
+	if (!size)
+		return;
 
-	m_memory->MakeRoomFor( m_idx + size );
-	memcpy( m_memory->GetPtr(m_idx), data, size );
+	m_memory->MakeRoomFor(m_idx + size);
+	memcpy(m_memory->GetPtr(m_idx), data, size);
 	m_idx += size;
 }
 
 void memSavingState::MakeRoomForData()
 {
-	pxAssertDev( m_memory, "Savestate memory/buffer pointer is null!" );
+	pxAssertDev(m_memory, "Savestate memory/buffer pointer is null!");
 
 	m_memory->ChunkSize = ReallocThreshold;
-	m_memory->MakeRoomFor( m_idx + MemoryBaseAllocSize );
+	m_memory->MakeRoomFor(m_idx + MemoryBaseAllocSize);
 }
 
 // Saving of state data to a memory buffer
@@ -306,20 +304,39 @@ memSavingState& memSavingState::FreezeAll()
 // --------------------------------------------------------------------------------------
 //  memLoadingState  (implementations)
 // --------------------------------------------------------------------------------------
-memLoadingState::memLoadingState( const SafeArray<u8>& load_from )
-	: SaveStateBase( const_cast<SafeArray<u8>&>(load_from) )
+memLoadingState::memLoadingState(const SafeArray<u8>& load_from)
+	: SaveStateBase(const_cast<SafeArray<u8>&>(load_from))
 {
 }
 
-memLoadingState::memLoadingState( const SafeArray<u8>* load_from )
-	: SaveStateBase( const_cast<SafeArray<u8>*>(load_from) )
+memLoadingState::memLoadingState(const SafeArray<u8>* load_from)
+	: SaveStateBase(const_cast<SafeArray<u8>*>(load_from))
 {
 }
 
 // Loading of state data from a memory buffer...
-void memLoadingState::FreezeMem( void* data, int size )
+void memLoadingState::FreezeMem(void* data, int size)
 {
 	const u8* const src = m_memory->GetPtr(m_idx);
 	m_idx += size;
-	memcpy( data, src, size );
+	memcpy(data, src, size);
+}
+
+wxString Exception::SaveStateLoadError::FormatDiagnosticMessage() const
+{
+	FastFormatUnicode retval;
+	retval.Write("Savestate is corrupt or incomplete!\n");
+	OSDlog(Color_Red, false, "Error: Savestate is corrupt or incomplete!");
+	_formatDiagMsg(retval);
+	return retval;
+}
+
+wxString Exception::SaveStateLoadError::FormatDisplayMessage() const
+{
+	FastFormatUnicode retval;
+	retval.Write(_("The savestate cannot be loaded, as it appears to be corrupt or incomplete."));
+	retval.Write("\n");
+	OSDlog(Color_Red, false, "Error: The savestate cannot be loaded, as it appears to be corrupt or incomplete.");
+	_formatUserMsg(retval);
+	return retval;
 }

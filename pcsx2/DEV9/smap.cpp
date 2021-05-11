@@ -318,8 +318,8 @@ void emac3_write(u32 addr)
 	}
 	dev9Ru32(addr) = wswap(value);
 }
-EXPORT_C_(u8)
-smap_read8(u32 addr)
+
+u8 smap_read8(u32 addr)
 {
 	switch (addr)
 	{
@@ -341,8 +341,8 @@ smap_read8(u32 addr)
 	DevCon.WriteLn("SMAP : error , 8 bit read @ %X,v=%X", addr, dev9Ru8(addr));
 	return dev9Ru8(addr);
 }
-EXPORT_C_(u16)
-smap_read16(u32 addr)
+
+u16 smap_read16(u32 addr)
 {
 	int rv = dev9Ru16(addr);
 	if (addr >= SMAP_BD_TX_BASE && addr < (SMAP_BD_TX_BASE + SMAP_BD_SIZE))
@@ -495,8 +495,7 @@ smap_read16(u32 addr)
 	return rv;
 }
 
-EXPORT_C_(u32)
-smap_read32(u32 addr)
+u32 smap_read32(u32 addr)
 {
 	if (addr >= SMAP_EMAC3_REGBASE && addr < SMAP_EMAC3_REGEND)
 	{
@@ -532,8 +531,7 @@ smap_read32(u32 addr)
 			return dev9Ru32(addr);
 	}
 }
-EXPORT_C_(void)
-smap_write8(u32 addr, u8 value)
+void smap_write8(u32 addr, u8 value)
 {
 	std::unique_lock<std::mutex> reset_lock(reset_mutex, std::defer_lock);
 	std::unique_lock<std::mutex> counter_lock(frame_counter_mutex, std::defer_lock);
@@ -606,8 +604,8 @@ smap_write8(u32 addr, u8 value)
 			return;
 	}
 }
-EXPORT_C_(void)
-smap_write16(u32 addr, u16 value)
+
+void smap_write16(u32 addr, u16 value)
 {
 	if (addr >= SMAP_BD_TX_BASE && addr < (SMAP_BD_TX_BASE + SMAP_BD_SIZE))
 	{
@@ -683,12 +681,12 @@ smap_write16(u32 addr, u16 value)
 			DevCon.WriteLn("SMAP: SMAP_R_TXFIFO_WR_PTR 16bit write %x", value);
 			dev9Ru16(addr) = value;
 			return;
-#define EMAC3_L_WRITE(name)                                   \
-	case name:                                                \
+#define EMAC3_L_WRITE(name) \
+	case name: \
 		DevCon.WriteLn("SMAP: " #name " 16 bit write %x", value); \
-		dev9Ru16(addr) = value;                               \
+		dev9Ru16(addr) = value; \
 		return;
-	// clang-format off
+			// clang-format off
 	//handle L writes
 	EMAC3_L_WRITE(SMAP_R_EMAC3_MODE0_L)
 	EMAC3_L_WRITE(SMAP_R_EMAC3_MODE1_L)
@@ -718,15 +716,15 @@ smap_write16(u32 addr, u16 value)
 	EMAC3_L_WRITE(SMAP_R_EMAC3_RX_WATERMARK_L)
 	EMAC3_L_WRITE(SMAP_R_EMAC3_TX_OCTETS)
 	EMAC3_L_WRITE(SMAP_R_EMAC3_RX_OCTETS)
-	// clang-format on
+			// clang-format on
 
-#define EMAC3_H_WRITE(name)                                   \
-	case name:                                                \
+#define EMAC3_H_WRITE(name) \
+	case name: \
 		DevCon.WriteLn("SMAP: " #name " 16 bit write %x", value); \
-		dev9Ru16(addr) = value;                               \
-		emac3_write(addr - 2);                                \
+		dev9Ru16(addr) = value; \
+		emac3_write(addr - 2); \
 		return;
-	// clang-format off
+			// clang-format off
 	//handle H writes
 	EMAC3_H_WRITE(SMAP_R_EMAC3_MODE0_H)
 	EMAC3_H_WRITE(SMAP_R_EMAC3_MODE1_H)
@@ -756,7 +754,7 @@ smap_write16(u32 addr, u16 value)
 	EMAC3_H_WRITE(SMAP_R_EMAC3_RX_WATERMARK_H)
 	EMAC3_H_WRITE(SMAP_R_EMAC3_TX_OCTETS + 2)
 	EMAC3_H_WRITE(SMAP_R_EMAC3_RX_OCTETS + 2)
-	// clang-format on
+			// clang-format on
 			/*
 	case SMAP_R_EMAC3_MODE0_L:
 		DevCon.WriteLn("SMAP: SMAP_R_EMAC3_MODE0 write %x", value);
@@ -792,8 +790,8 @@ smap_write16(u32 addr, u16 value)
 			return;
 	}
 }
-EXPORT_C_(void)
-smap_write32(u32 addr, u32 value)
+
+void smap_write32(u32 addr, u32 value)
 {
 	if (addr >= SMAP_EMAC3_REGBASE && addr < SMAP_EMAC3_REGEND)
 	{
@@ -814,8 +812,8 @@ smap_write32(u32 addr, u32 value)
 			return;
 	}
 }
-EXPORT_C_(void)
-smap_readDMA8Mem(u32* pMem, int size)
+
+void smap_readDMA8Mem(u32* pMem, int size)
 {
 	if (dev9Ru16(SMAP_R_RXFIFO_CTRL) & SMAP_RXFIFO_DMAEN)
 	{
@@ -835,8 +833,8 @@ smap_readDMA8Mem(u32* pMem, int size)
 		dev9Ru16(SMAP_R_RXFIFO_CTRL) &= ~SMAP_RXFIFO_DMAEN;
 	}
 }
-EXPORT_C_(void)
-smap_writeDMA8Mem(u32* pMem, int size)
+
+void smap_writeDMA8Mem(u32* pMem, int size)
 {
 	if (dev9Ru16(SMAP_R_TXFIFO_CTRL) & SMAP_TXFIFO_DMAEN)
 	{
@@ -858,8 +856,8 @@ smap_writeDMA8Mem(u32* pMem, int size)
 		dev9Ru16(SMAP_R_TXFIFO_CTRL) &= ~SMAP_TXFIFO_DMAEN;
 	}
 }
-EXPORT_C_(void)
-smap_async(u32 cycles)
+
+void smap_async(u32 cycles)
 {
 	if (fireIntR)
 	{
