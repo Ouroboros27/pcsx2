@@ -22,6 +22,9 @@
 #include "PrecompiledHeader.h"
 #include "GSDrawScanlineCodeGenerator.h"
 #include "GSVertexSW.h"
+#include "../../GS_codegen.h"
+
+#undef _t
 
 #if _M_SSE >= 0x501 && (defined(_M_AMD64) || defined(_WIN64))
 
@@ -36,20 +39,20 @@ static const int _v = _args + 8;
 #define _m_local__gd__clut r11
 #define _m_local__gd__tex a3
 // More pretty name
-#define _z    ymm8
-#define _f    ymm9
-#define _s    ymm10
-#define _t    ymm11
-#define _q    ymm12
+#define _z ymm8
+#define _f ymm9
+#define _s ymm10
+#define _t ymm11
+#define _q ymm12
 #define _f_rb ymm13
 #define _f_ga ymm14
 #define _test ymm15
 // Extra bonus
-#define _rb   ymm2
-#define _ga   ymm3
-#define _fm   ymm4
-#define _zm   ymm5
-#define _fd   ymm6
+#define _rb ymm2
+#define _ga ymm3
+#define _fm ymm4
+#define _zm ymm5
+#define _fd ymm6
 
 #define _rip_local(field) (m_rip ? ptr[rip + &m_local.field] : ptr[_m_local + offsetof(GSScanlineLocalData, field)])
 #define _rip_global(field) (m_rip ? ptr[rip + &m_local.gd->field] : ptr[_m_local__gd + offsetof(GSScanlineGlobalData, field)])
@@ -62,8 +65,8 @@ static const int _rz_r13 = -8 * 3;
 //static const int _rz_r14 = -8 * 4;
 //static const int _rz_r15 = -8 * 5;
 static const int _rz_top = -8 * 4;
-static const int _rz_zs  = -8 * 8;
-static const int _rz_zd  = -8 * 12;
+static const int _rz_zs = -8 * 8;
+static const int _rz_zd = -8 * 12;
 static const int _rz_cov = -8 * 16;
 #endif
 
@@ -122,7 +125,7 @@ void GSDrawScanlineCodeGenerator::Generate()
 		align(16);
 	}
 
-L("loop");
+	L("loop");
 
 	// ecx = steps
 	// esi = fzbr
@@ -298,7 +301,7 @@ L("loop");
 
 	WriteFrame();
 
-L("step");
+	L("step");
 
 	// if(steps <= 0) break;
 
@@ -313,7 +316,7 @@ L("step");
 		jmp("loop", T_NEAR);
 	}
 
-L("exit");
+	L("exit");
 
 #ifdef _WIN64
 	for (int i = 6; i < 16; i++)
@@ -371,8 +374,8 @@ void GSDrawScanlineCodeGenerator::Init()
 	}
 	else
 	{
-		mov(ebx, edx);          // left
-		xor(edx, edx);          // skip
+		mov(ebx, edx); // left
+		xor(edx, edx); // skip
 		lea(ecx, ptr[ecx - 8]); // steps
 	}
 
@@ -1315,7 +1318,7 @@ void GSDrawScanlineCodeGenerator::SampleTextureLOD()
 		vpsrld(ymm0, ymm4, 16);
 
 		vmovdqa(ptr[&m_local.temp.lod.i], ymm0);
-/*
+		/*
 vpslld(ymm5, ymm0, 6);
 vpslld(ymm6, ymm4, 16);
 vpsrld(ymm6, ymm6, 24);

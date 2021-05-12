@@ -21,32 +21,34 @@
 
 #include "PrecompiledHeader.h"
 #include "GSVertexTrace.h"
-#include "GSUtil.h"
-#include "GSState.h"
+#include "../../GSUtil.h"
+#include "../../GSState.h"
 
 CONSTINIT const GSVector4 GSVertexTrace::s_minmax = GSVector4::cxpr(FLT_MAX, -FLT_MAX, 0.f, 0.f);
 
 GSVertexTrace::GSVertexTrace(const GSState* state)
-	: m_accurate_stq(false), m_state(state), m_primclass(GS_INVALID_CLASS)
+	: m_accurate_stq(false)
+	, m_state(state)
+	, m_primclass(GS_INVALID_CLASS)
 {
 	m_force_filter = static_cast<BiFiltering>(theApp.GetConfigI("filter"));
 	memset(&m_alpha, 0, sizeof(m_alpha));
 
-	#define InitUpdate3(P, IIP, TME, FST, COLOR) \
-		m_fmm[0][COLOR][FST][TME][IIP][P] = &GSVertexTrace::FindMinMax<P, IIP, TME, FST, COLOR, 0>; \
-		m_fmm[1][COLOR][FST][TME][IIP][P] = &GSVertexTrace::FindMinMax<P, IIP, TME, FST, COLOR, 1>; \
+#define InitUpdate3(P, IIP, TME, FST, COLOR) \
+	m_fmm[0][COLOR][FST][TME][IIP][P] = &GSVertexTrace::FindMinMax<P, IIP, TME, FST, COLOR, 0>; \
+	m_fmm[1][COLOR][FST][TME][IIP][P] = &GSVertexTrace::FindMinMax<P, IIP, TME, FST, COLOR, 1>;
 
-	#define InitUpdate2(P, IIP, TME) \
-		InitUpdate3(P, IIP, TME, 0, 0) \
+#define InitUpdate2(P, IIP, TME) \
+	InitUpdate3(P, IIP, TME, 0, 0) \
 		InitUpdate3(P, IIP, TME, 0, 1) \
-		InitUpdate3(P, IIP, TME, 1, 0) \
-		InitUpdate3(P, IIP, TME, 1, 1) \
+			InitUpdate3(P, IIP, TME, 1, 0) \
+				InitUpdate3(P, IIP, TME, 1, 1)
 
-	#define InitUpdate(P) \
-		InitUpdate2(P, 0, 0) \
+#define InitUpdate(P) \
+	InitUpdate2(P, 0, 0) \
 		InitUpdate2(P, 0, 1) \
-		InitUpdate2(P, 1, 0) \
-		InitUpdate2(P, 1, 1) \
+			InitUpdate2(P, 1, 0) \
+				InitUpdate2(P, 1, 1)
 
 	InitUpdate(GS_POINT_CLASS);
 	InitUpdate(GS_LINE_CLASS);

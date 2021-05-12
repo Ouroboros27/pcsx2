@@ -23,10 +23,9 @@
 #include "PrecompiledHeader.h"
 #include "GSSetupPrimCodeGenerator.h"
 #include "GSVertexSW.h"
+#include "../../GS_codegen.h"
 
 #if _M_SSE >= 0x501 && (defined(_M_AMD64) || defined(_WIN64))
-
-using namespace Xbyak;
 
 #define _rip_local(field) (m_rip ? ptr[rip + &m_local.field] : ptr[t0 + offsetof(GSScanlineLocalData, field)])
 #define _rip_local_v(field, offset) (m_rip ? ptr[rip + &m_local.field] : ptr[t0 + offset])
@@ -224,8 +223,12 @@ void GSSetupPrimCodeGenerator::Texture_AVX2()
 
 				switch (j)
 				{
-					case 0: vmovdqa(_rip_local_v(d[i].s, variableOffsetS), ymm2); break;
-					case 1: vmovdqa(_rip_local_v(d[i].t, variableOffsetT), ymm2); break;
+					case 0:
+						vmovdqa(_rip_local_v(d[i].s, variableOffsetS), ymm2);
+						break;
+					case 1:
+						vmovdqa(_rip_local_v(d[i].t, variableOffsetT), ymm2);
+						break;
 				}
 			}
 			else
@@ -238,9 +241,15 @@ void GSSetupPrimCodeGenerator::Texture_AVX2()
 
 				switch (j)
 				{
-					case 0: vmovaps(_rip_local_v(d[i].s, variableOffsetS), ymm2); break;
-					case 1: vmovaps(_rip_local_v(d[i].t, variableOffsetT), ymm2); break;
-					case 2: vmovaps(_rip_local_v(d[i].q, variableOffsetQ), ymm2); break;
+					case 0:
+						vmovaps(_rip_local_v(d[i].s, variableOffsetS), ymm2);
+						break;
+					case 1:
+						vmovaps(_rip_local_v(d[i].t, variableOffsetT), ymm2);
+						break;
+					case 2:
+						vmovaps(_rip_local_v(d[i].q, variableOffsetQ), ymm2);
+						break;
 				}
 			}
 		}
@@ -334,10 +343,18 @@ void GSSetupPrimCodeGenerator::Color_AVX2()
 
 		switch (m_sel.prim)
 		{
-			case GS_POINT_CLASS:    last = 0; break;
-			case GS_LINE_CLASS:     last = 1; break;
-			case GS_TRIANGLE_CLASS: last = 2; break;
-			case GS_SPRITE_CLASS:   last = 1; break;
+			case GS_POINT_CLASS:
+				last = 0;
+				break;
+			case GS_LINE_CLASS:
+				last = 1;
+				break;
+			case GS_TRIANGLE_CLASS:
+				last = 2;
+				break;
+			case GS_SPRITE_CLASS:
+				last = 1;
+				break;
 		}
 
 		if (!(m_sel.prim == GS_SPRITE_CLASS && (m_en.z || m_en.f))) // if this is a sprite, the last vertex was already loaded in Depth()

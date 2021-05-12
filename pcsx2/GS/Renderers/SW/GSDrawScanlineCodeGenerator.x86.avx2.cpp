@@ -22,6 +22,9 @@
 #include "PrecompiledHeader.h"
 #include "GSDrawScanlineCodeGenerator.h"
 #include "GSVertexSW.h"
+#include "../../GS_codegen.h"
+
+#undef _t
 
 #if _M_SSE >= 0x501 && !(defined(_M_AMD64) || defined(_WIN64))
 
@@ -47,7 +50,7 @@ void GSDrawScanlineCodeGenerator::Generate()
 		align(16);
 	}
 
-L("loop");
+	L("loop");
 
 	// ecx = steps
 	// esi = fzbr
@@ -225,7 +228,7 @@ L("loop");
 
 	WriteFrame();
 
-L("step");
+	L("step");
 
 	// if(steps <= 0) break;
 
@@ -240,7 +243,7 @@ L("step");
 		jmp("loop", T_NEAR);
 	}
 
-L("exit");
+	L("exit");
 
 	pop(ebp);
 	pop(edi);
@@ -281,8 +284,8 @@ void GSDrawScanlineCodeGenerator::Init()
 	}
 	else
 	{
-		mov(ebx, edx);          // left
-		xor(edx, edx);          // skip
+		mov(ebx, edx); // left
+		xor(edx, edx); // skip
 		lea(ecx, ptr[ecx - 8]); // steps
 	}
 

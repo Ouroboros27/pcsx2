@@ -39,7 +39,7 @@ void GSDrawScanlineCodeGenerator::Step_SSE()
 {
 }
 
-void GSDrawScanlineCodeGenerator::TestZ_SSE(const Xmm& temp1, const Xmm& temp2)
+void GSDrawScanlineCodeGenerator::TestZ_SSE(const Xbyak::Xmm& temp1, const Xbyak::Xmm& temp2)
 {
 }
 
@@ -47,11 +47,11 @@ void GSDrawScanlineCodeGenerator::SampleTexture_SSE()
 {
 }
 
-void GSDrawScanlineCodeGenerator::Wrap_SSE(const Xmm& uv)
+void GSDrawScanlineCodeGenerator::Wrap_SSE(const Xbyak::Xmm& uv)
 {
 }
 
-void GSDrawScanlineCodeGenerator::Wrap_SSE(const Xmm& uv0, const Xmm& uv1)
+void GSDrawScanlineCodeGenerator::Wrap_SSE(const Xbyak::Xmm& uv0, const Xbyak::Xmm& uv1)
 {
 }
 
@@ -99,17 +99,17 @@ void GSDrawScanlineCodeGenerator::WriteFrame_SSE()
 {
 }
 
-void GSDrawScanlineCodeGenerator::ReadPixel_SSE(const Xmm& dst, const Reg64& addr)
+void GSDrawScanlineCodeGenerator::ReadPixel_SSE(const Xbyak::Xmm& dst, const Xbyak::Reg64& addr)
 {
 }
 
-void GSDrawScanlineCodeGenerator::WritePixel_SSE(const Xmm& src, const Reg64& addr, const Reg8& mask, bool fast, int psm, int fz)
+void GSDrawScanlineCodeGenerator::WritePixel_SSE(const Xbyak::Xmm& src, const Xbyak::Reg64& addr, const Xbyak::Reg8& mask, bool fast, int psm, int fz)
 {
 }
 
 //static const int s_offsets[4] = {0, 2, 8, 10};
 
-void GSDrawScanlineCodeGenerator::WritePixel_SSE(const Xmm& src, const Reg64& addr, uint8 i, int psm)
+void GSDrawScanlineCodeGenerator::WritePixel_SSE(const Xbyak::Xmm& src, const Xbyak::Reg64& addr, uint8 i, int psm)
 {
 }
 
@@ -117,7 +117,7 @@ void GSDrawScanlineCodeGenerator::ReadTexel_SSE(int pixels, int mip_offset)
 {
 }
 
-void GSDrawScanlineCodeGenerator::ReadTexel_SSE(const Xmm& dst, const Xmm& addr, uint8 i)
+void GSDrawScanlineCodeGenerator::ReadTexel_SSE(const Xbyak::Xmm& dst, const Xbyak::Xmm& addr, uint8 i)
 {
 }
 

@@ -22,7 +22,7 @@
 #include "PrecompiledHeader.h"
 #include "GSTextureCache.h"
 #include "GSRendererHW.h"
-#include "GSUtil.h"
+#include "../../GSUtil.h"
 
 bool GSTextureCache::m_disable_partial_invalidation = false;
 bool GSTextureCache::m_wrap_gs_mem = false;
@@ -33,23 +33,23 @@ GSTextureCache::GSTextureCache(GSRenderer* r)
 {
 	if (theApp.GetConfigB("UserHacks"))
 	{
-		UserHacks_HalfPixelOffset      = theApp.GetConfigI("UserHacks_HalfPixelOffset") == 1;
-		m_preload_frame                = theApp.GetConfigB("preload_frame_with_gs_data");
+		UserHacks_HalfPixelOffset = theApp.GetConfigI("UserHacks_HalfPixelOffset") == 1;
+		m_preload_frame = theApp.GetConfigB("preload_frame_with_gs_data");
 		m_disable_partial_invalidation = theApp.GetConfigB("UserHacks_DisablePartialInvalidation");
-		m_can_convert_depth            = !theApp.GetConfigB("UserHacks_DisableDepthSupport");
-		m_cpu_fb_conversion            = theApp.GetConfigB("UserHacks_CPU_FB_Conversion");
-		m_texture_inside_rt            = theApp.GetConfigB("UserHacks_TextureInsideRt");
-		m_wrap_gs_mem                  = theApp.GetConfigB("wrap_gs_mem");
+		m_can_convert_depth = !theApp.GetConfigB("UserHacks_DisableDepthSupport");
+		m_cpu_fb_conversion = theApp.GetConfigB("UserHacks_CPU_FB_Conversion");
+		m_texture_inside_rt = theApp.GetConfigB("UserHacks_TextureInsideRt");
+		m_wrap_gs_mem = theApp.GetConfigB("wrap_gs_mem");
 	}
 	else
 	{
-		UserHacks_HalfPixelOffset      = false;
-		m_preload_frame                = false;
+		UserHacks_HalfPixelOffset = false;
+		m_preload_frame = false;
 		m_disable_partial_invalidation = false;
-		m_can_convert_depth            = true;
-		m_cpu_fb_conversion            = false;
-		m_texture_inside_rt            = false;
-		m_wrap_gs_mem                  = false;
+		m_can_convert_depth = true;
+		m_cpu_fb_conversion = false;
+		m_texture_inside_rt = false;
+		m_wrap_gs_mem = false;
 	}
 
 	m_paltex = theApp.GetConfigB("paltex");
@@ -642,10 +642,16 @@ GSTextureCache::Target* GSTextureCache::LookupTarget(const GIFRegTEX0& TEX0, int
 		else
 		{
 #ifdef ENABLE_OGL_DEBUG
-			switch (type) {
-				case RenderTarget: m_renderer->m_dev->ClearRenderTarget(dst->m_texture, 0); break;
-				case DepthStencil: m_renderer->m_dev->ClearDepth(dst->m_texture); break;
-				default: break;
+			switch (type)
+			{
+				case RenderTarget:
+					m_renderer->m_dev->ClearRenderTarget(dst->m_texture, 0);
+					break;
+				case DepthStencil:
+					m_renderer->m_dev->ClearDepth(dst->m_texture);
+					break;
+				default:
+					break;
 			}
 #endif
 		}
@@ -1584,7 +1590,7 @@ GSTextureCache::Source* GSTextureCache::CreateSource(const GIFRegTEX0& TEX0, con
 
 		if (UserHacks_HalfPixelOffset && hack)
 		{
-			switch(m_renderer->GetUpscaleMultiplier())
+			switch (m_renderer->GetUpscaleMultiplier())
 			{
 				case 0: //Custom Resolution
 				{
@@ -1594,13 +1600,41 @@ GSTextureCache::Source* GSTextureCache::CreateSource(const GIFRegTEX0& TEX0, con
 					dst->m_texture->LikelyOffset = true;
 					break;
 				}
-				case 2:  modx = 2.2f; mody = 2.2f; dst->m_texture->LikelyOffset = true;  break;
-				case 3:  modx = 3.1f; mody = 3.1f; dst->m_texture->LikelyOffset = true;  break;
-				case 4:  modx = 4.2f; mody = 4.2f; dst->m_texture->LikelyOffset = true;  break;
-				case 5:  modx = 5.3f; mody = 5.3f; dst->m_texture->LikelyOffset = true;  break;
-				case 6:  modx = 6.2f; mody = 6.2f; dst->m_texture->LikelyOffset = true;  break;
-				case 8:  modx = 8.2f; mody = 8.2f; dst->m_texture->LikelyOffset = true;  break;
-				default: modx = 0.0f; mody = 0.0f; dst->m_texture->LikelyOffset = false; break;
+				case 2:
+					modx = 2.2f;
+					mody = 2.2f;
+					dst->m_texture->LikelyOffset = true;
+					break;
+				case 3:
+					modx = 3.1f;
+					mody = 3.1f;
+					dst->m_texture->LikelyOffset = true;
+					break;
+				case 4:
+					modx = 4.2f;
+					mody = 4.2f;
+					dst->m_texture->LikelyOffset = true;
+					break;
+				case 5:
+					modx = 5.3f;
+					mody = 5.3f;
+					dst->m_texture->LikelyOffset = true;
+					break;
+				case 6:
+					modx = 6.2f;
+					mody = 6.2f;
+					dst->m_texture->LikelyOffset = true;
+					break;
+				case 8:
+					modx = 8.2f;
+					mody = 8.2f;
+					dst->m_texture->LikelyOffset = true;
+					break;
+				default:
+					modx = 0.0f;
+					mody = 0.0f;
+					dst->m_texture->LikelyOffset = false;
+					break;
 			}
 		}
 
@@ -1727,8 +1761,7 @@ bool GSTextureCache::Surface::Overlaps(uint32 bp, uint32 bw, uint32 psm, const G
 {
 	// Valid only for color formats.
 	uint32 const end_block = GSLocalMemory::m_psm[psm].bn(rect.z - 1, rect.w - 1, bp, bw);
-	return (m_TEX0.TBP0 <= bp        && bp        <= m_end_block)
-	    || (m_TEX0.TBP0 <= end_block && end_block <= m_end_block);
+	return (m_TEX0.TBP0 <= bp && bp <= m_end_block) || (m_TEX0.TBP0 <= end_block && end_block <= m_end_block);
 }
 
 // GSTextureCache::Source
@@ -2182,8 +2215,8 @@ void GSTextureCache::SourceMap::RemoveAt(Source* s)
 	m_surfaces.erase(s);
 
 	GL_CACHE("TC: Remove Src Texture: %d (0x%x)",
-			 s->m_texture ? s->m_texture->GetID() : 0,
-			 s->m_TEX0.TBP0);
+		s->m_texture ? s->m_texture->GetID() : 0,
+		s->m_TEX0.TBP0);
 
 	if (s->m_target)
 	{
@@ -2288,23 +2321,23 @@ std::size_t GSTextureCache::PaletteKeyHash::operator()(const PaletteKey& key) co
 	size_t clut_hash = 3831179159;
 	for (uint16 i = 0; i < pal; i += 16)
 	{
-		clut_hash = (clut_hash + 1488000301) ^ (clut[i     ] +   33644011);
-		clut_hash = (clut_hash + 3831179159) ^ (clut[i +  1] +   47627467);
-		clut_hash = (clut_hash + 3659574209) ^ (clut[i +  2] +  577038523);
-		clut_hash = (clut_hash +   33644011) ^ (clut[i +  3] + 3491555267);
+		clut_hash = (clut_hash + 1488000301) ^ (clut[i] + 33644011);
+		clut_hash = (clut_hash + 3831179159) ^ (clut[i + 1] + 47627467);
+		clut_hash = (clut_hash + 3659574209) ^ (clut[i + 2] + 577038523);
+		clut_hash = (clut_hash + 33644011) ^ (clut[i + 3] + 3491555267);
 
-		clut_hash = (clut_hash +  777771959) ^ (clut[i +  4] + 3301075993);
-		clut_hash = (clut_hash + 4019618579) ^ (clut[i +  5] + 4186992613);
-		clut_hash = (clut_hash + 3465668953) ^ (clut[i +  6] + 3043435883);
-		clut_hash = (clut_hash + 3494478943) ^ (clut[i +  7] + 3441897883);
+		clut_hash = (clut_hash + 777771959) ^ (clut[i + 4] + 3301075993);
+		clut_hash = (clut_hash + 4019618579) ^ (clut[i + 5] + 4186992613);
+		clut_hash = (clut_hash + 3465668953) ^ (clut[i + 6] + 3043435883);
+		clut_hash = (clut_hash + 3494478943) ^ (clut[i + 7] + 3441897883);
 
-		clut_hash = (clut_hash + 3432010979) ^ (clut[i +  8] + 2167922789);
-		clut_hash = (clut_hash + 1570862863) ^ (clut[i +  9] + 3401920591);
+		clut_hash = (clut_hash + 3432010979) ^ (clut[i + 8] + 2167922789);
+		clut_hash = (clut_hash + 1570862863) ^ (clut[i + 9] + 3401920591);
 		clut_hash = (clut_hash + 1002648679) ^ (clut[i + 10] + 1293530519);
-		clut_hash = (clut_hash +  551381741) ^ (clut[i + 11] + 2539834039);
+		clut_hash = (clut_hash + 551381741) ^ (clut[i + 11] + 2539834039);
 
-		clut_hash = (clut_hash + 3768974459) ^ (clut[i + 12] +  169943507);
-		clut_hash = (clut_hash +  862380703) ^ (clut[i + 13] + 2906932549);
+		clut_hash = (clut_hash + 3768974459) ^ (clut[i + 12] + 169943507);
+		clut_hash = (clut_hash + 862380703) ^ (clut[i + 13] + 2906932549);
 		clut_hash = (clut_hash + 3433082137) ^ (clut[i + 14] + 4234384109);
 		clut_hash = (clut_hash + 2679083843) ^ (clut[i + 15] + 2719605247);
 	}
@@ -2378,7 +2411,7 @@ std::shared_ptr<GSTextureCache::Palette> GSTextureCache::PaletteMap::LookupPalet
 			{
 				// Palette is unused
 				it = map.erase(it); // Erase element from map
-									// The palette object should now be gone as the shared pointer to the object in the map is deleted
+					// The palette object should now be gone as the shared pointer to the object in the map is deleted
 			}
 			else
 			{

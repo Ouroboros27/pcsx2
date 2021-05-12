@@ -22,10 +22,9 @@
 #include "PrecompiledHeader.h"
 #include "GSSetupPrimCodeGenerator.h"
 #include "GSVertexSW.h"
+#include "../../GS_codegen.h"
 
 #if _M_SSE >= 0x501 && !(defined(_M_AMD64) || defined(_WIN64))
-
-using namespace Xbyak;
 
 static const int _args = 0;
 static const int _vertex = _args + 4;
@@ -206,8 +205,12 @@ void GSSetupPrimCodeGenerator::Texture_AVX2()
 
 				switch (j)
 				{
-					case 0: vmovdqa(ptr[&m_local.d[i].s], ymm2); break;
-					case 1: vmovdqa(ptr[&m_local.d[i].t], ymm2); break;
+					case 0:
+						vmovdqa(ptr[&m_local.d[i].s], ymm2);
+						break;
+					case 1:
+						vmovdqa(ptr[&m_local.d[i].t], ymm2);
+						break;
 				}
 			}
 			else
@@ -216,9 +219,15 @@ void GSSetupPrimCodeGenerator::Texture_AVX2()
 
 				switch (j)
 				{
-					case 0: vmovaps(ptr[&m_local.d[i].s], ymm2); break;
-					case 1: vmovaps(ptr[&m_local.d[i].t], ymm2); break;
-					case 2: vmovaps(ptr[&m_local.d[i].q], ymm2); break;
+					case 0:
+						vmovaps(ptr[&m_local.d[i].s], ymm2);
+						break;
+					case 1:
+						vmovaps(ptr[&m_local.d[i].t], ymm2);
+						break;
+					case 2:
+						vmovaps(ptr[&m_local.d[i].q], ymm2);
+						break;
 				}
 			}
 		}
@@ -324,10 +333,18 @@ void GSSetupPrimCodeGenerator::Color_AVX2()
 
 		switch (m_sel.prim)
 		{
-			case GS_POINT_CLASS:    last = 0; break;
-			case GS_LINE_CLASS:     last = 1; break;
-			case GS_TRIANGLE_CLASS: last = 2; break;
-			case GS_SPRITE_CLASS:   last = 1; break;
+			case GS_POINT_CLASS:
+				last = 0;
+				break;
+			case GS_LINE_CLASS:
+				last = 1;
+				break;
+			case GS_TRIANGLE_CLASS:
+				last = 2;
+				break;
+			case GS_SPRITE_CLASS:
+				last = 1;
+				break;
 		}
 
 		if (!(m_sel.prim == GS_SPRITE_CLASS && (m_en.z || m_en.f))) // if this is a sprite, the last vertex was already loaded in Depth()
