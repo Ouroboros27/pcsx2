@@ -37,7 +37,7 @@ void SysThreadBase::Start()
 	Sleep(1);
 
 	pxAssertDev((m_ExecMode == ExecMode_Closing) || (m_ExecMode == ExecMode_Closed),
-				"Unexpected thread status during SysThread startup.");
+		"Unexpected thread status during SysThread startup.");
 
 	m_sem_event.Post();
 }
@@ -247,8 +247,6 @@ void SysThreadBase::Resume()
 				return;
 			if ((m_ExecMode != ExecMode_Closed) && (m_ExecMode != ExecMode_Paused))
 				return;
-			if (!GetCorePlugins().AreLoaded())
-				return;
 			break;
 
 		case ExecMode_Paused:
@@ -257,7 +255,7 @@ void SysThreadBase::Resume()
 	}
 
 	pxAssertDev((m_ExecMode == ExecMode_Closed) || (m_ExecMode == ExecMode_Paused),
-				"SysThreadBase is not in a closed/paused state?  wtf!");
+		"SysThreadBase is not in a closed/paused state?  wtf!");
 
 	OnResumeReady();
 	m_ExecMode = ExecMode_Opened;
@@ -334,7 +332,7 @@ bool SysThreadBase::StateCheckInThread()
 				if (g_CDVDReset)
 					//AppCoreThread deals with Reseting CDVD
 					OnResumeInThread(false);
-					
+
 				g_CDVDReset = false;
 				break;
 			}

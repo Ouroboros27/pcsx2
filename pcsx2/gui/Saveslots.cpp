@@ -32,7 +32,7 @@
 static int StatesC = 0;
 
 #ifdef USE_NEW_SAVESLOTS_UI
-std::array<Saveslot,StateSlotsCount> saveslot_cache = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::array<Saveslot, StateSlotsCount> saveslot_cache = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 #endif
 
 // FIXME : Use of the IsSavingOrLoading flag is mostly a hack until we implement a
@@ -45,8 +45,8 @@ public:
 	wxString GetEventName() const { return L"ClearSavingLoadingFlag"; }
 
 	virtual ~SysExecEvent_ClearSavingLoadingFlag() = default;
-	SysExecEvent_ClearSavingLoadingFlag() { }
-	SysExecEvent_ClearSavingLoadingFlag *Clone() const { return new SysExecEvent_ClearSavingLoadingFlag(); }
+	SysExecEvent_ClearSavingLoadingFlag() {}
+	SysExecEvent_ClearSavingLoadingFlag* Clone() const { return new SysExecEvent_ClearSavingLoadingFlag(); }
 
 protected:
 	void InvokeEvent()
@@ -72,7 +72,6 @@ void States_FreezeCurrentSlot()
 		return;
 	}
 
-	GSchangeSaveState(StatesC, SaveStateBase::GetFilename(StatesC).ToUTF8());
 	StateCopy_SaveToSlot(StatesC);
 
 #ifdef USE_NEW_SAVESLOTS_UI
@@ -98,7 +97,6 @@ void _States_DefrostCurrentSlot(bool isFromBackup)
 		return;
 	}
 
-	GSchangeSaveState(StatesC, SaveStateBase::GetFilename(StatesC).ToUTF8());
 	StateCopy_LoadFromSlot(StatesC, isFromBackup);
 
 	GetSysExecutorThread().PostIdleEvent(SysExecEvent_ClearSavingLoadingFlag());
@@ -127,10 +125,6 @@ void States_updateLoadBackupMenuItem()
 static void OnSlotChanged()
 {
 	OSDlog(Color_StrongGreen, true, " > Selected savestate slot %d", StatesC);
-
-	if (GSchangeSaveState != NULL)
-		GSchangeSaveState(StatesC, SaveStateBase::GetFilename(StatesC).utf8_str());
-
 	States_updateLoadBackupMenuItem();
 }
 
