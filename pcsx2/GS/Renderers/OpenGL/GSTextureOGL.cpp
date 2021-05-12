@@ -23,7 +23,7 @@
 #include <limits.h>
 #include "GSTextureOGL.h"
 #include "GLState.h"
-#include "GSPng.h"
+#include "../../GSPng.h"
 
 #ifdef ENABLE_OGL_DEBUG_MEM_BW
 extern uint64 g_real_texture_upload_byte;
@@ -171,13 +171,20 @@ namespace PboPool
 } // namespace PboPool
 
 GSTextureOGL::GSTextureOGL(int type, int w, int h, int format, GLuint fbo_read, bool mipmap)
-	: m_clean(false), m_generate_mipmap(true), m_local_buffer(nullptr), m_r_x(0), m_r_y(0), m_r_w(0), m_r_h(0), m_layer(0)
+	: m_clean(false)
+	, m_generate_mipmap(true)
+	, m_local_buffer(nullptr)
+	, m_r_x(0)
+	, m_r_y(0)
+	, m_r_w(0)
+	, m_r_h(0)
+	, m_layer(0)
 {
 	// OpenGL didn't like dimensions of size 0
 	m_size.x = std::max(1, w);
 	m_size.y = std::max(1, h);
 	m_format = format;
-	m_type   = type;
+	m_type = type;
 	m_fbo_read = fbo_read;
 	m_texture_id = 0;
 	m_sparse = false;
@@ -189,73 +196,73 @@ GSTextureOGL::GSTextureOGL(int type, int w, int h, int format, GLuint fbo_read, 
 			// 1 Channel integer
 		case GL_R32UI:
 		case GL_R32I:
-			m_int_format    = GL_RED_INTEGER;
-			m_int_type      = (m_format == GL_R32UI) ? GL_UNSIGNED_INT : GL_INT;
-			m_int_shift     = 2;
+			m_int_format = GL_RED_INTEGER;
+			m_int_type = (m_format == GL_R32UI) ? GL_UNSIGNED_INT : GL_INT;
+			m_int_shift = 2;
 			break;
 		case GL_R16UI:
-			m_int_format    = GL_RED_INTEGER;
-			m_int_type      = GL_UNSIGNED_SHORT;
-			m_int_shift     = 1;
+			m_int_format = GL_RED_INTEGER;
+			m_int_type = GL_UNSIGNED_SHORT;
+			m_int_shift = 1;
 			break;
 
 			// 1 Channel normalized
 		case GL_R8:
-			m_int_format    = GL_RED;
-			m_int_type      = GL_UNSIGNED_BYTE;
-			m_int_shift     = 0;
+			m_int_format = GL_RED;
+			m_int_type = GL_UNSIGNED_BYTE;
+			m_int_shift = 0;
 			break;
 
 			// 4 channel normalized
 		case GL_RGBA16:
-			m_int_format    = GL_RGBA;
-			m_int_type      = GL_UNSIGNED_SHORT;
-			m_int_shift     = 3;
+			m_int_format = GL_RGBA;
+			m_int_type = GL_UNSIGNED_SHORT;
+			m_int_shift = 3;
 			break;
 		case GL_RGBA8:
-			m_int_format    = GL_RGBA;
-			m_int_type      = GL_UNSIGNED_BYTE;
-			m_int_shift     = 2;
+			m_int_format = GL_RGBA;
+			m_int_type = GL_UNSIGNED_BYTE;
+			m_int_shift = 2;
 			break;
 
 			// 4 channel integer
 		case GL_RGBA16I:
 		case GL_RGBA16UI:
-			m_int_format    = GL_RGBA_INTEGER;
-			m_int_type      = (m_format == GL_R16UI) ? GL_UNSIGNED_SHORT : GL_SHORT;
-			m_int_shift     = 3;
+			m_int_format = GL_RGBA_INTEGER;
+			m_int_type = (m_format == GL_R16UI) ? GL_UNSIGNED_SHORT : GL_SHORT;
+			m_int_shift = 3;
 			break;
 
 			// 4 channel float
 		case GL_RGBA32F:
-			m_int_format    = GL_RGBA;
-			m_int_type      = GL_FLOAT;
-			m_int_shift     = 4;
+			m_int_format = GL_RGBA;
+			m_int_type = GL_FLOAT;
+			m_int_shift = 4;
 			break;
 		case GL_RGBA16F:
-			m_int_format    = GL_RGBA;
-			m_int_type      = GL_HALF_FLOAT;
-			m_int_shift     = 3;
+			m_int_format = GL_RGBA;
+			m_int_type = GL_HALF_FLOAT;
+			m_int_shift = 3;
 			break;
 
 			// Depth buffer
 		case GL_DEPTH32F_STENCIL8:
-			m_int_format    = GL_DEPTH_STENCIL;
-			m_int_type      = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
-			m_int_shift     = 3; // 4 bytes for depth + 4 bytes for stencil by texels
+			m_int_format = GL_DEPTH_STENCIL;
+			m_int_type = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+			m_int_shift = 3; // 4 bytes for depth + 4 bytes for stencil by texels
 			break;
 
 			// Backbuffer
 		case 0:
-			m_int_format    = 0;
-			m_int_type      = 0;
-			m_int_shift     = 2; // 4 bytes by texels
+			m_int_format = 0;
+			m_int_type = 0;
+			m_int_shift = 2; // 4 bytes by texels
 			break;
 
 		default:
-			m_int_format    = 0;
-			m_int_type      = 0;
-			m_int_shift     = 0;
+			m_int_format = 0;
+			m_int_type = 0;
+			m_int_shift = 0;
 			ASSERT(0);
 	}
 
@@ -329,7 +336,7 @@ GSTextureOGL::GSTextureOGL(int type, int w, int h, int format, GLuint fbo_read, 
 		if (m_size != old_size)
 		{
 			fprintf(stderr, "Sparse texture size (%dx%d) isn't a multiple of gpu page size (%dx%d)\n",
-					old_size.x, old_size.y, m_gpu_page_size.x, m_gpu_page_size.y);
+				old_size.x, old_size.y, m_gpu_page_size.x, m_gpu_page_size.y);
 		}
 		glTextureParameteri(m_texture_id, GL_TEXTURE_SPARSE_ARB, true);
 	}

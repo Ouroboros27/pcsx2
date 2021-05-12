@@ -26,7 +26,7 @@
 #ifdef _WIN32
 #include "resource.h"
 #else
-#include "GSResources.h"
+#include "GS_res.h"
 #endif
 
 GSShaderOGL::GSShaderOGL(bool debug)
@@ -75,9 +75,12 @@ GLuint GSShaderOGL::LinkProgram(GLuint vs, GLuint gs, GLuint ps)
 		return it->second;
 
 	GLuint p = glCreateProgram();
-	if (vs) glAttachShader(p, vs);
-	if (ps) glAttachShader(p, ps);
-	if (gs) glAttachShader(p, gs);
+	if (vs)
+		glAttachShader(p, vs);
+	if (ps)
+		glAttachShader(p, ps);
+	if (gs)
+		glAttachShader(p, gs);
 
 	glLinkProgram(p);
 

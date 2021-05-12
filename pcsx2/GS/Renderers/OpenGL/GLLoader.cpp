@@ -151,9 +151,9 @@ namespace Emulate_DSA
 namespace GLLoader
 {
 
-#define fprintf_once(out, ...)         \
-	do                                 \
-		if (s_first_load)              \
+#define fprintf_once(out, ...) \
+	do \
+		if (s_first_load) \
 			fprintf(out, __VA_ARGS__); \
 	while (0);
 
@@ -171,7 +171,7 @@ namespace GLLoader
 	bool found_GL_ARB_clear_texture = false;
 	bool found_GL_ARB_get_texture_sub_image = false; // Not yet used
 	// DX11 GPU
-	bool found_GL_ARB_gpu_shader5 = false;             // Require IvyBridge
+	bool found_GL_ARB_gpu_shader5 = false; // Require IvyBridge
 	bool found_GL_ARB_shader_image_load_store = false; // Intel IB. Nvidia/AMD miss Mesa implementation.
 	bool found_GL_ARB_shader_storage_buffer_object = false;
 	bool found_GL_ARB_compute_shader = false;
@@ -392,7 +392,7 @@ namespace GLLoader
 		if (x > x_max && y > y_max)
 		{
 			fprintf_once(stdout, "%s isn't sparse compatible. Page size (%d,%d) is too big (%d, %d)\n",
-						 name, x, y, x_max, y_max);
+				name, x, y, x_max, y_max);
 			return false;
 		}
 

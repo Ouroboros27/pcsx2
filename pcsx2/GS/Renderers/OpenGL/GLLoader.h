@@ -23,15 +23,13 @@
 
 #define GL_TEX_LEVEL_0 (0)
 #define GL_TEX_LEVEL_1 (1)
-#define GL_FB_DEFAULT  (0)
-#define GL_BUFFER_0    (0)
+#define GL_FB_DEFAULT (0)
+#define GL_BUFFER_0 (0)
 
 #ifndef GL_CONTEXT_FLAG_NO_ERROR_BIT_KHR
 #define GL_CONTEXT_FLAG_NO_ERROR_BIT_KHR 0x00000008
 #endif
 
-// FIX compilation issue with Mesa 10
-#include "glext_extra.h"
 
 /*************************************************************
  * Extra define not provided in glcorearb.h
@@ -55,11 +53,6 @@
 // Added in GL4.6. Code should be updated but driver support...
 #ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
-#endif
-
-// Believe me or not, they forgot to add the interaction with DSA...
-#ifndef GL_EXT_direct_state_access
-typedef void(APIENTRYP PFNGLTEXTUREPAGECOMMITMENTEXTPROC)(GLuint texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLboolean commit);
 #endif
 
 // **********************  End of the extra header ******************* //
@@ -112,6 +105,18 @@ typedef void(APIENTRYP PFNGLTEXTUREPAGECOMMITMENTEXTPROC)(GLuint texture, GLint 
 #define ENABLE_GL_VERSION_4_4 1
 #define ENABLE_GL_VERSION_4_5 1
 // #define ENABLE_GL_VERSION_4_6 1
+//
+
+
+#include "GS.h"
+// FIX compilation issue with Mesa 10
+#include "glext_extra.h"
+
+// Believe me or not, they forgot to add the interaction with DSA...
+#ifndef GL_EXT_direct_state_access
+typedef void(APIENTRYP PFNGLTEXTUREPAGECOMMITMENTEXTPROC)(GLuint texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLboolean commit);
+#endif
+
 
 // It should be done by ENABLE_GL_VERSION_1_4 but it conflicts with the old gl.h
 #if defined(__unix__) || defined(__APPLE__)

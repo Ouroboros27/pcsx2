@@ -20,10 +20,10 @@
  */
 
 #include "PrecompiledHeader.h"
-#include "GSState.h"
+#include "../../GSState.h"
 #include "GSDeviceOGL.h"
 #include "GLState.h"
-#include "GSUtil.h"
+#include "../../GSUtil.h"
 #include <fstream>
 
 //#define ONLY_LINES
@@ -31,7 +31,7 @@
 #ifdef _WIN32
 #include "resource.h"
 #else
-#include "GSResources.h"
+#include "GS_res.h"
 #endif
 
 // TODO port those value into PerfMon API
@@ -41,16 +41,16 @@ uint64 g_vertex_upload_byte = 0;
 uint64 g_uniform_upload_byte = 0;
 #endif
 
-static const uint32 g_merge_cb_index     = 10;
+static const uint32 g_merge_cb_index = 10;
 static const uint32 g_interlace_cb_index = 11;
-static const uint32 g_fx_cb_index        = 14;
-static const uint32 g_convert_index      = 15;
-static const uint32 g_vs_cb_index        = 20;
-static const uint32 g_ps_cb_index        = 21;
+static const uint32 g_fx_cb_index = 14;
+static const uint32 g_convert_index = 15;
+static const uint32 g_vs_cb_index = 20;
+static const uint32 g_ps_cb_index = 21;
 
-bool  GSDeviceOGL::m_debug_gl_call = false;
-int   GSDeviceOGL::m_shader_inst = 0;
-int   GSDeviceOGL::m_shader_reg  = 0;
+bool GSDeviceOGL::m_debug_gl_call = false;
+int GSDeviceOGL::m_shader_inst = 0;
+int GSDeviceOGL::m_shader_reg = 0;
 FILE* GSDeviceOGL::m_debug_gl_file = NULL;
 
 GSDeviceOGL::GSDeviceOGL()
@@ -81,7 +81,7 @@ GSDeviceOGL::GSDeviceOGL()
 	else
 		m_filter = TriFiltering::None;
 
-	// Reset the debug file
+		// Reset the debug file
 #ifdef ENABLE_OGL_DEBUG
 	if (theApp.GetCurrentRendererType() == GSRendererType::OGL_SW)
 		m_debug_gl_file = fopen("GS_opengl_debug_sw.txt", "w");
@@ -369,14 +369,14 @@ bool GSDeviceOGL::Create(const std::shared_ptr<GSWnd>& wnd)
 
 		static_assert(sizeof(GSVertexPT1) == sizeof(GSVertex), "wrong GSVertex size");
 		std::vector<GSInputLayoutOGL> il_convert = {
-			{0, 2 , GL_FLOAT          , GL_FALSE , sizeof(GSVertexPT1) , (const GLvoid*)( 0) } ,
-			{1, 2 , GL_FLOAT          , GL_FALSE , sizeof(GSVertexPT1) , (const GLvoid*)(16) } ,
-			{2, 4 , GL_UNSIGNED_BYTE  , GL_FALSE , sizeof(GSVertex)    , (const GLvoid*)( 8) } ,
-			{3, 1 , GL_FLOAT          , GL_FALSE , sizeof(GSVertex)    , (const GLvoid*)(12) } ,
-			{4, 2 , GL_UNSIGNED_SHORT , GL_FALSE , sizeof(GSVertex)    , (const GLvoid*)(16) } ,
-			{5, 1 , GL_UNSIGNED_INT   , GL_FALSE , sizeof(GSVertex)    , (const GLvoid*)(20) } ,
-			{6, 2 , GL_UNSIGNED_SHORT , GL_FALSE , sizeof(GSVertex)    , (const GLvoid*)(24) } ,
-			{7, 4 , GL_UNSIGNED_BYTE  , GL_TRUE  , sizeof(GSVertex)    , (const GLvoid*)(28) } , // Only 1 byte is useful but hardware unit only support 4B
+			{0, 2, GL_FLOAT, GL_FALSE, sizeof(GSVertexPT1), (const GLvoid*)(0)},
+			{1, 2, GL_FLOAT, GL_FALSE, sizeof(GSVertexPT1), (const GLvoid*)(16)},
+			{2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GSVertex), (const GLvoid*)(8)},
+			{3, 1, GL_FLOAT, GL_FALSE, sizeof(GSVertex), (const GLvoid*)(12)},
+			{4, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(GSVertex), (const GLvoid*)(16)},
+			{5, 1, GL_UNSIGNED_INT, GL_FALSE, sizeof(GSVertex), (const GLvoid*)(20)},
+			{6, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(GSVertex), (const GLvoid*)(24)},
+			{7, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(GSVertex), (const GLvoid*)(28)}, // Only 1 byte is useful but hardware unit only support 4B
 		};
 		m_va = new GSVertexBufferStateOGL(il_convert);
 	}
@@ -478,9 +478,7 @@ bool GSDeviceOGL::Create(const std::shared_ptr<GSWnd>& wnd)
 		int ShadeBoost_Contrast = std::max(0, std::min(theApp.GetConfigI("ShadeBoost_Contrast"), 100));
 		int ShadeBoost_Brightness = std::max(0, std::min(theApp.GetConfigI("ShadeBoost_Brightness"), 100));
 		int ShadeBoost_Saturation = std::max(0, std::min(theApp.GetConfigI("ShadeBoost_Saturation"), 100));
-		std::string shade_macro = format("#define SB_SATURATION %d.0\n", ShadeBoost_Saturation)
-			+ format("#define SB_BRIGHTNESS %d.0\n", ShadeBoost_Brightness)
-			+ format("#define SB_CONTRAST %d.0\n", ShadeBoost_Contrast);
+		std::string shade_macro = format("#define SB_SATURATION %d.0\n", ShadeBoost_Saturation) + format("#define SB_BRIGHTNESS %d.0\n", ShadeBoost_Brightness) + format("#define SB_CONTRAST %d.0\n", ShadeBoost_Contrast);
 
 		theApp.LoadResource(IDR_SHADEBOOST_GLSL, shader);
 
@@ -920,12 +918,11 @@ GSDepthStencilOGL* GSDeviceOGL::CreateDepthStencil(OMDepthStencilSelector dssel)
 	if (dssel.ztst != ZTST_ALWAYS || dssel.zwe)
 	{
 		static const GLenum ztst[] =
-		{
-			GL_NEVER,
-			GL_ALWAYS,
-			GL_GEQUAL,
-			GL_GREATER
-		};
+			{
+				GL_NEVER,
+				GL_ALWAYS,
+				GL_GEQUAL,
+				GL_GREATER};
 		dss->EnableDepth();
 		dss->SetDepth(ztst[dssel.ztst], dssel.zwe);
 	}
@@ -980,8 +977,7 @@ GLuint GSDeviceOGL::CompileVS(VSSelector sel)
 
 GLuint GSDeviceOGL::CompileGS(GSSelector sel)
 {
-	std::string macro = format("#define GS_POINT %d\n", sel.point)
-		+ format("#define GS_LINE %d\n", sel.line);
+	std::string macro = format("#define GS_POINT %d\n", sel.point) + format("#define GS_LINE %d\n", sel.line);
 
 	if (GLLoader::buggy_sso_dual_src)
 		return m_shader->CompileShader("tfx_vgs.glsl", "gs_main", GL_GEOMETRY_SHADER, m_shader_tfx_vgs.data(), macro);
@@ -991,45 +987,7 @@ GLuint GSDeviceOGL::CompileGS(GSSelector sel)
 
 GLuint GSDeviceOGL::CompilePS(PSSelector sel)
 {
-	std::string macro = format("#define PS_FST %d\n", sel.fst)
-		+ format("#define PS_WMS %d\n", sel.wms)
-		+ format("#define PS_WMT %d\n", sel.wmt)
-		+ format("#define PS_TEX_FMT %d\n", sel.tex_fmt)
-		+ format("#define PS_DFMT %d\n", sel.dfmt)
-		+ format("#define PS_DEPTH_FMT %d\n", sel.depth_fmt)
-		+ format("#define PS_CHANNEL_FETCH %d\n", sel.channel)
-		+ format("#define PS_URBAN_CHAOS_HLE %d\n", sel.urban_chaos_hle)
-		+ format("#define PS_TALES_OF_ABYSS_HLE %d\n", sel.tales_of_abyss_hle)
-		+ format("#define PS_TEX_IS_FB %d\n", sel.tex_is_fb)
-		+ format("#define PS_INVALID_TEX0 %d\n", sel.invalid_tex0)
-		+ format("#define PS_AEM %d\n", sel.aem)
-		+ format("#define PS_TFX %d\n", sel.tfx)
-		+ format("#define PS_TCC %d\n", sel.tcc)
-		+ format("#define PS_ATST %d\n", sel.atst)
-		+ format("#define PS_FOG %d\n", sel.fog)
-		+ format("#define PS_CLR1 %d\n", sel.clr1)
-		+ format("#define PS_FBA %d\n", sel.fba)
-		+ format("#define PS_LTF %d\n", sel.ltf)
-		+ format("#define PS_AUTOMATIC_LOD %d\n", sel.automatic_lod)
-		+ format("#define PS_MANUAL_LOD %d\n", sel.manual_lod)
-		+ format("#define PS_COLCLIP %d\n", sel.colclip)
-		+ format("#define PS_DATE %d\n", sel.date)
-		+ format("#define PS_TCOFFSETHACK %d\n", sel.tcoffsethack)
-		+ format("#define PS_POINT_SAMPLER %d\n", sel.point_sampler)
-		+ format("#define PS_BLEND_A %d\n", sel.blend_a)
-		+ format("#define PS_BLEND_B %d\n", sel.blend_b)
-		+ format("#define PS_BLEND_C %d\n", sel.blend_c)
-		+ format("#define PS_BLEND_D %d\n", sel.blend_d)
-		+ format("#define PS_IIP %d\n", sel.iip)
-		+ format("#define PS_SHUFFLE %d\n", sel.shuffle)
-		+ format("#define PS_READ_BA %d\n", sel.read_ba)
-		+ format("#define PS_WRITE_RG %d\n", sel.write_rg)
-		+ format("#define PS_FBMASK %d\n", sel.fbmask)
-		+ format("#define PS_HDR %d\n", sel.hdr)
-		+ format("#define PS_DITHER %d\n", sel.dither)
-		+ format("#define PS_ZCLAMP %d\n", sel.zclamp)
-		+ format("#define PS_PABE %d\n", sel.pabe)
-	;
+	std::string macro = format("#define PS_FST %d\n", sel.fst) + format("#define PS_WMS %d\n", sel.wms) + format("#define PS_WMT %d\n", sel.wmt) + format("#define PS_TEX_FMT %d\n", sel.tex_fmt) + format("#define PS_DFMT %d\n", sel.dfmt) + format("#define PS_DEPTH_FMT %d\n", sel.depth_fmt) + format("#define PS_CHANNEL_FETCH %d\n", sel.channel) + format("#define PS_URBAN_CHAOS_HLE %d\n", sel.urban_chaos_hle) + format("#define PS_TALES_OF_ABYSS_HLE %d\n", sel.tales_of_abyss_hle) + format("#define PS_TEX_IS_FB %d\n", sel.tex_is_fb) + format("#define PS_INVALID_TEX0 %d\n", sel.invalid_tex0) + format("#define PS_AEM %d\n", sel.aem) + format("#define PS_TFX %d\n", sel.tfx) + format("#define PS_TCC %d\n", sel.tcc) + format("#define PS_ATST %d\n", sel.atst) + format("#define PS_FOG %d\n", sel.fog) + format("#define PS_CLR1 %d\n", sel.clr1) + format("#define PS_FBA %d\n", sel.fba) + format("#define PS_LTF %d\n", sel.ltf) + format("#define PS_AUTOMATIC_LOD %d\n", sel.automatic_lod) + format("#define PS_MANUAL_LOD %d\n", sel.manual_lod) + format("#define PS_COLCLIP %d\n", sel.colclip) + format("#define PS_DATE %d\n", sel.date) + format("#define PS_TCOFFSETHACK %d\n", sel.tcoffsethack) + format("#define PS_POINT_SAMPLER %d\n", sel.point_sampler) + format("#define PS_BLEND_A %d\n", sel.blend_a) + format("#define PS_BLEND_B %d\n", sel.blend_b) + format("#define PS_BLEND_C %d\n", sel.blend_c) + format("#define PS_BLEND_D %d\n", sel.blend_d) + format("#define PS_IIP %d\n", sel.iip) + format("#define PS_SHUFFLE %d\n", sel.shuffle) + format("#define PS_READ_BA %d\n", sel.read_ba) + format("#define PS_WRITE_RG %d\n", sel.write_rg) + format("#define PS_FBMASK %d\n", sel.fbmask) + format("#define PS_HDR %d\n", sel.hdr) + format("#define PS_DITHER %d\n", sel.dither) + format("#define PS_ZCLAMP %d\n", sel.zclamp) + format("#define PS_PABE %d\n", sel.pabe);
 
 	if (GLLoader::buggy_sso_dual_src)
 		return m_shader->CompileShader("tfx.glsl", "ps_main", GL_FRAGMENT_SHADER, m_shader_tfx_fs.data(), macro);
@@ -1235,11 +1193,11 @@ void GSDeviceOGL::SelfShaderTest()
 							sel.fst = 1;
 
 							sel.depth_fmt = depth;
-							sel.ltf       = ltf;
-							sel.aem       = aem;
-							sel.tex_fmt   = fmt;
-							sel.wms       = wms;
-							sel.wmt       = wmt;
+							sel.ltf = ltf;
+							sel.aem = aem;
+							sel.tex_fmt = fmt;
+							sel.wms = wms;
+							sel.wmt = wmt;
 							std::string file = format("Shader_Ltf_%d__Aem_%d__TFmt_%d__Wms_%d__Wmt_%d__DepthFmt_%d.glsl.asm",
 								ltf, aem, fmt, wms, wmt, depth);
 							SelfShaderTestRun(test, file, sel, nb_shader);
@@ -1356,7 +1314,7 @@ void GSDeviceOGL::StretchRect(GSTexture* sTex, const GSVector4& sRect, GSTexture
 	}
 
 	bool draw_in_depth = (ps == m_convert.ps[ShaderConvert_RGBA8_TO_FLOAT32] || ps == m_convert.ps[ShaderConvert_RGBA8_TO_FLOAT24] ||
-	                      ps == m_convert.ps[ShaderConvert_RGBA8_TO_FLOAT16] || ps == m_convert.ps[ShaderConvert_RGB5A1_TO_FLOAT16]);
+						  ps == m_convert.ps[ShaderConvert_RGBA8_TO_FLOAT16] || ps == m_convert.ps[ShaderConvert_RGB5A1_TO_FLOAT16]);
 
 	// Performance optimization. It might be faster to use a framebuffer blit for standard case
 	// instead to emulate it with shader
@@ -1422,12 +1380,12 @@ void GSDeviceOGL::StretchRect(GSTexture* sTex, const GSVector4& sRect, GSTexture
 	}
 
 	GSVertexPT1 vertices[] =
-	{
-		{GSVector4(left  , top   , 0.0f, 0.0f) , GSVector2(flip_sr.x , flip_sr.y)} ,
-		{GSVector4(right , top   , 0.0f, 0.0f) , GSVector2(flip_sr.z , flip_sr.y)} ,
-		{GSVector4(left  , bottom, 0.0f, 0.0f) , GSVector2(flip_sr.x , flip_sr.w)} ,
-		{GSVector4(right , bottom, 0.0f, 0.0f) , GSVector2(flip_sr.z , flip_sr.w)} ,
-	};
+		{
+			{GSVector4(left, top, 0.0f, 0.0f), GSVector2(flip_sr.x, flip_sr.y)},
+			{GSVector4(right, top, 0.0f, 0.0f), GSVector2(flip_sr.z, flip_sr.y)},
+			{GSVector4(left, bottom, 0.0f, 0.0f), GSVector2(flip_sr.x, flip_sr.w)},
+			{GSVector4(right, bottom, 0.0f, 0.0f), GSVector2(flip_sr.z, flip_sr.w)},
+		};
 
 	IASetVertexBuffer(vertices, 4);
 	IASetPrimitiveTopology(GL_TRIANGLE_STRIP);
@@ -2036,21 +1994,44 @@ void GSDeviceOGL::DebugOutputToFile(GLenum gl_source, GLenum gl_type, GLuint id,
 	static int sev_counter = 0;
 	switch (gl_type)
 	{
-		case GL_DEBUG_TYPE_ERROR_ARB               : type = "Error"; break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB : type = "Deprecated bhv"; break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB  : type = "Undefined bhv"; break;
-		case GL_DEBUG_TYPE_PORTABILITY_ARB         : type = "Portability"; break;
-		case GL_DEBUG_TYPE_PERFORMANCE_ARB         : type = "Perf"; break;
-		case GL_DEBUG_TYPE_OTHER_ARB               : type = "Oth"; break;
-		case GL_DEBUG_TYPE_PUSH_GROUP              : return; // Don't print message injected by myself
-		case GL_DEBUG_TYPE_POP_GROUP               : return; // Don't print message injected by myself
-		default                                    : type = "TTT"; break;
+		case GL_DEBUG_TYPE_ERROR_ARB:
+			type = "Error";
+			break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
+			type = "Deprecated bhv";
+			break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+			type = "Undefined bhv";
+			break;
+		case GL_DEBUG_TYPE_PORTABILITY_ARB:
+			type = "Portability";
+			break;
+		case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+			type = "Perf";
+			break;
+		case GL_DEBUG_TYPE_OTHER_ARB:
+			type = "Oth";
+			break;
+		case GL_DEBUG_TYPE_PUSH_GROUP:
+			return; // Don't print message injected by myself
+		case GL_DEBUG_TYPE_POP_GROUP:
+			return; // Don't print message injected by myself
+		default:
+			type = "TTT";
+			break;
 	}
 	switch (gl_severity)
 	{
-		case GL_DEBUG_SEVERITY_HIGH_ARB   : severity = "High"; sev_counter++; break;
-		case GL_DEBUG_SEVERITY_MEDIUM_ARB : severity = "Mid"; break;
-		case GL_DEBUG_SEVERITY_LOW_ARB    : severity = "Low"; break;
+		case GL_DEBUG_SEVERITY_HIGH_ARB:
+			severity = "High";
+			sev_counter++;
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+			severity = "Mid";
+			break;
+		case GL_DEBUG_SEVERITY_LOW_ARB:
+			severity = "Low";
+			break;
 		default:
 			if (id == 0xFEAD)
 				severity = "Cache";
@@ -2062,13 +2043,27 @@ void GSDeviceOGL::DebugOutputToFile(GLenum gl_source, GLenum gl_type, GLuint id,
 	}
 	switch (gl_source)
 	{
-		case GL_DEBUG_SOURCE_API_ARB             : source = "API"; break;
-		case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB   : source = "WINDOW"; break;
-		case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB : source = "COMPILER"; break;
-		case GL_DEBUG_SOURCE_THIRD_PARTY_ARB     : source = "3rdparty"; break;
-		case GL_DEBUG_SOURCE_APPLICATION_ARB     : source = "Application"; break;
-		case GL_DEBUG_SOURCE_OTHER_ARB           : source = "Others"; break;
-		default                                  : source = "???"; break;
+		case GL_DEBUG_SOURCE_API_ARB:
+			source = "API";
+			break;
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+			source = "WINDOW";
+			break;
+		case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+			source = "COMPILER";
+			break;
+		case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+			source = "3rdparty";
+			break;
+		case GL_DEBUG_SOURCE_APPLICATION_ARB:
+			source = "Application";
+			break;
+		case GL_DEBUG_SOURCE_OTHER_ARB:
+			source = "Others";
+			break;
+		default:
+			source = "???";
+			break;
 	}
 
 #ifdef _DEBUG
@@ -2114,25 +2109,46 @@ uint16 GSDeviceOGL::ConvertBlendEnum(uint16 generic)
 {
 	switch (generic)
 	{
-		case SRC_COLOR       : return GL_SRC_COLOR;
-		case INV_SRC_COLOR   : return GL_ONE_MINUS_SRC_COLOR;
-		case DST_COLOR       : return GL_DST_COLOR;
-		case INV_DST_COLOR   : return GL_ONE_MINUS_DST_COLOR;
-		case SRC1_COLOR      : return GL_SRC1_COLOR;
-		case INV_SRC1_COLOR  : return GL_ONE_MINUS_SRC1_COLOR;
-		case SRC_ALPHA       : return GL_SRC_ALPHA;
-		case INV_SRC_ALPHA   : return GL_ONE_MINUS_SRC_ALPHA;
-		case DST_ALPHA       : return GL_DST_ALPHA;
-		case INV_DST_ALPHA   : return GL_ONE_MINUS_DST_ALPHA;
-		case SRC1_ALPHA      : return GL_SRC1_ALPHA;
-		case INV_SRC1_ALPHA  : return GL_ONE_MINUS_SRC1_ALPHA;
-		case CONST_COLOR     : return GL_CONSTANT_COLOR;
-		case INV_CONST_COLOR : return GL_ONE_MINUS_CONSTANT_COLOR;
-		case CONST_ONE       : return GL_ONE;
-		case CONST_ZERO      : return GL_ZERO;
-		case OP_ADD          : return GL_FUNC_ADD;
-		case OP_SUBTRACT     : return GL_FUNC_SUBTRACT;
-		case OP_REV_SUBTRACT : return GL_FUNC_REVERSE_SUBTRACT;
-		default              : ASSERT(0); return 0;
+		case SRC_COLOR:
+			return GL_SRC_COLOR;
+		case INV_SRC_COLOR:
+			return GL_ONE_MINUS_SRC_COLOR;
+		case DST_COLOR:
+			return GL_DST_COLOR;
+		case INV_DST_COLOR:
+			return GL_ONE_MINUS_DST_COLOR;
+		case SRC1_COLOR:
+			return GL_SRC1_COLOR;
+		case INV_SRC1_COLOR:
+			return GL_ONE_MINUS_SRC1_COLOR;
+		case SRC_ALPHA:
+			return GL_SRC_ALPHA;
+		case INV_SRC_ALPHA:
+			return GL_ONE_MINUS_SRC_ALPHA;
+		case DST_ALPHA:
+			return GL_DST_ALPHA;
+		case INV_DST_ALPHA:
+			return GL_ONE_MINUS_DST_ALPHA;
+		case SRC1_ALPHA:
+			return GL_SRC1_ALPHA;
+		case INV_SRC1_ALPHA:
+			return GL_ONE_MINUS_SRC1_ALPHA;
+		case CONST_COLOR:
+			return GL_CONSTANT_COLOR;
+		case INV_CONST_COLOR:
+			return GL_ONE_MINUS_CONSTANT_COLOR;
+		case CONST_ONE:
+			return GL_ONE;
+		case CONST_ZERO:
+			return GL_ZERO;
+		case OP_ADD:
+			return GL_FUNC_ADD;
+		case OP_SUBTRACT:
+			return GL_FUNC_SUBTRACT;
+		case OP_REV_SUBTRACT:
+			return GL_FUNC_REVERSE_SUBTRACT;
+		default:
+			ASSERT(0);
+			return 0;
 	}
 }
