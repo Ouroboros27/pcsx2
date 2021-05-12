@@ -144,9 +144,26 @@ namespace Dialogs
 		}
 
 	protected:
+		class GSThread : public pxThread
+		{
+		protected:
+			// parent thread
+			typedef pxThread _parent;
+			void ExecuteTaskInThread();
+			void OnStop();
+			GSDumpDialog* m_root_window;
+
+		public:
+			int m_renderer = 0;
+			bool m_debug = false;
+			size_t m_debug_index;
+			std::unique_ptr<pxInputStream> m_dump_file;
+			GSThread(GSDumpDialog* dlg);
+			virtual ~GSThread();
+		};
+
 		wxListView* m_dump_list;
 		wxStaticBitmap* m_preview_image;
-		wxString m_selected_dump;
 		wxCheckBox* m_debug_mode;
 		wxRadioBox* m_renderer_overrides;
 		wxTreeCtrl* m_gif_list;
@@ -156,6 +173,10 @@ namespace Dialogs
 		wxButton* m_selection;
 		wxButton* m_vsync;
 		wxButton* m_settings;
+
+		std::unique_ptr<GSThread> m_thread;
+
+		wxString m_selected_dump;
 		wxButton* m_run;
 		long m_focused_dump;
 		wxFileSystemWatcher m_fs_watcher;
@@ -336,24 +357,6 @@ namespace Dialogs
 		void ParseTreeReg(wxTreeItemId& id, GIFReg reg, u128 data, bool packed);
 		void ParseTreePrim(wxTreeItemId& id, u32 prim);
 		void CloseDump(wxCommandEvent& event);
-		class GSThread : public pxThread
-		{
-		protected:
-			// parent thread
-			typedef pxThread _parent;
-			void ExecuteTaskInThread();
-			void OnStop();
-			GSDumpDialog* m_root_window;
-
-		public:
-			int m_renderer = 0;
-			bool m_debug = false;
-			size_t m_debug_index;
-			std::unique_ptr<pxInputStream> m_dump_file;
-			GSThread(GSDumpDialog* dlg);
-			virtual ~GSThread();
-		};
-		std::unique_ptr<GSThread> m_thread;
 	};
 
 

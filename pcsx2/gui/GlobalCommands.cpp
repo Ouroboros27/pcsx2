@@ -63,10 +63,10 @@ wxString KeyAcceleratorCode::ToString() const
 	// Let's use wx's string formatter:
 
 	return wxAcceleratorEntry(
-			   (cmd ? wxACCEL_CMD : 0) |
-				   (shift ? wxACCEL_SHIFT : 0) |
-				   (alt ? wxACCEL_ALT : 0),
-			   keycode)
+		(cmd ? wxACCEL_CMD : 0) |
+			(shift ? wxACCEL_SHIFT : 0) |
+			(alt ? wxACCEL_ALT : 0),
+		keycode)
 		.ToString();
 }
 
@@ -338,10 +338,10 @@ namespace Implementations
 			// So if we're set to close on esc and nogui:
 			// If the user didn't specify --noguiprompt - exit immediately.
 			// else prompt to either exit or abort the suspend.
-			if (!wxGetApp().ExitPromptWithNoGUI()          // configured to exit without a dialog
+			if (!wxGetApp().ExitPromptWithNoGUI() // configured to exit without a dialog
 				|| (wxOK == wxMessageBox(_("Exit PCSX2?"), // or confirmed exit at the dialog
-										 L"PCSX2",
-										 wxICON_WARNING | wxOK | wxCANCEL)))
+								L"PCSX2",
+								wxICON_WARNING | wxOK | wxCANCEL)))
 			{
 				// Pcsx2App knows to exit if no gui and the GS window closes.
 				gsframe->Close();
@@ -390,7 +390,7 @@ namespace Implementations
 
 	void Sys_TakeSnapshot()
 	{
-		if (GSmakeSnapshot(g_Conf->Folders.Snapshots.ToUTF8()))
+		if (GSmakeSnapshot(g_Conf->Folders.Snapshots.ToUTF8().data()))
 			OSDlog(ConsoleColors::Color_Black, true, "Snapshot taken");
 	}
 
@@ -400,10 +400,12 @@ namespace Implementations
 			return;
 		if (renderswitch_delay == 0)
 		{
-			ScopedCoreThreadPause paused_core(new SysExecEvent_SaveSinglePlugin(PluginId_GS));
-			renderswitch = !renderswitch;
-			paused_core.AllowResume();
-			renderswitch_delay = -1;
+			/* TODO: reimplement this:
+             * ScopedCoreThreadPause paused_core(new SysExecEvent_SaveSinglePlugin(PluginId_GS));
+			 * renderswitch = !renderswitch;
+             * paused_core.AllowResume();
+             * renderswitch_delay = -1;
+             */
 		}
 	}
 
@@ -474,33 +476,23 @@ namespace Implementations
 				GetMainFramePtr()->Disable();
 			}
 
-			if (GSsetupRecording)
+			// GSsetupRecording can be aborted/canceled by the user. Don't go on to record the audio if that happens.
+			std::string filename;
+			if (GSsetupRecording(filename))
 			{
-				// GSsetupRecording can be aborted/canceled by the user. Don't go on to record the audio if that happens.
-				std::string filename;
-				if (GSsetupRecording(filename))
+				if (g_Conf->AudioCapture.EnableAudio && !SPU2setupRecording(&filename))
 				{
-					if (g_Conf->AudioCapture.EnableAudio && !SPU2setupRecording(&filename))
-					{
-						GSendRecording();
-						g_Pcsx2Recording = false;
-					}
-				}
-				else // recording dialog canceled by the user. align our state
+					GSendRecording();
 					g_Pcsx2Recording = false;
+				}
 			}
-			// the GS doesn't support recording
-			else if (!g_Conf->AudioCapture.EnableAudio || !SPU2setupRecording(nullptr))
+			else // recording dialog canceled by the user. align our state
 				g_Pcsx2Recording = false;
-
-			if (GetMainFramePtr() && needsMainFrameEnable)
-				GetMainFramePtr()->Enable();
 		}
 		else
 		{
 			// stop recording
-			if (GSendRecording)
-				GSendRecording();
+			GSendRecording();
 			if (g_Conf->AudioCapture.EnableAudio)
 				SPU2endRecording();
 		}
@@ -906,13 +898,13 @@ void AcceleratorDictionary::Map(const KeyAcceleratorCode& _acode, const char* se
 			if (_acode.ToString() != acode.ToString())
 			{
 				Console.WriteLn(Color_StrongGreen, L"Overriding '%s': assigning %s (instead of %s)",
-								WX_STR(fromUTF8(searchfor)), WX_STR(acode.ToString()), WX_STR(_acode.ToString()));
+					WX_STR(fromUTF8(searchfor)), WX_STR(acode.ToString()), WX_STR(_acode.ToString()));
 			}
 		}
 		else
 		{
 			Console.Error(L"Error overriding KB shortcut for '%s': can't understand '%s'",
-						  WX_STR(fromUTF8(searchfor)), WX_STR(overrideStr));
+				WX_STR(fromUTF8(searchfor)), WX_STR(overrideStr));
 		}
 	}
 	// End of overrides section
@@ -939,7 +931,7 @@ void AcceleratorDictionary::Map(const KeyAcceleratorCode& _acode, const char* se
 	if (result == NULL)
 	{
 		Console.Warning(L"Kbd Accelerator '%s' is mapped to unknown command '%s'",
-						WX_STR(acode.ToString()), WX_STR(fromUTF8(searchfor)));
+			WX_STR(acode.ToString()), WX_STR(fromUTF8(searchfor)));
 	}
 	else
 	{
@@ -958,7 +950,7 @@ void AcceleratorDictionary::Map(const KeyAcceleratorCode& _acode, const char* se
 			if (acode.cmd || acode.shift)
 			{
 				Console.Error(L"Cannot map %s to Sys_TakeSnapshot - must not include Shift or Ctrl - these modifiers will be added automatically.",
-							  WX_STR(acode.ToString()));
+					WX_STR(acode.ToString()));
 			}
 			else
 			{
@@ -973,8 +965,8 @@ void AcceleratorDictionary::Map(const KeyAcceleratorCode& _acode, const char* se
 				if (_acode.val32 != acode.val32)
 				{ // overriding default
 					Console.WriteLn(Color_Green, L"Sys_TakeSnapshot: automatically mapping also %s and %s",
-									WX_STR(shifted.ToString()),
-									WX_STR(controlledShifted.ToString()));
+						WX_STR(shifted.ToString()),
+						WX_STR(controlledShifted.ToString()));
 				}
 			}
 		}
@@ -1034,7 +1026,7 @@ void Pcsx2App::InitDefaultGlobalAccelerators()
 	// At this early stage of startup, the application assumes installed mode, so portable mode custom keybindings may present issues.
 	// Relevant - https://github.com/PCSX2/pcsx2/blob/678829a5b2b8ca7a3e42d8edc9ab201bf00b0fe9/pcsx2/gui/AppInit.cpp#L479
 	// Compared to L990 of GlobalCommands.cpp which also does an init for the GlobalAccelerators.
-	// The idea was to have: Reading from the PCSX2_keys.ini in the ini folder based on PCSX2_keys.ini.default which get overridden. 
+	// The idea was to have: Reading from the PCSX2_keys.ini in the ini folder based on PCSX2_keys.ini.default which get overridden.
 	// We also need to make it easier to do custom hotkeys for both normal/portable PCSX2 in the GUI.
 	GlobalAccels->Map(AAC(WXK_TAB), "Framelimiter_TurboToggle");
 	GlobalAccels->Map(AAC(WXK_TAB).Shift(), "Framelimiter_SlomoToggle");
@@ -1045,7 +1037,7 @@ void Pcsx2App::InitDefaultGlobalAccelerators()
 	GlobalAccels->Map(AAC(WXK_ESCAPE), "Sys_SuspendResume");
 
 	// Fixme: GS Dumps could need a seperate label and hotkey binding or less interlinked with normal screenshots/snapshots , which messes with overloading lots of different mappings, commented the other GlobalAccels for this reason. GSdx hardcodes keybindings.
-	 GlobalAccels->Map(AAC(WXK_F8), "Sys_TakeSnapshot");
+	GlobalAccels->Map(AAC(WXK_F8), "Sys_TakeSnapshot");
 	// GlobalAccels->Map(AAC(WXK_F8).Shift(), "Sys_TakeSnapshot");
 	// GlobalAccels->Map(AAC(WXK_F8).Shift().Cmd(), "Sys_TakeSnapshot");
 	GlobalAccels->Map(AAC(WXK_F9), "Sys_RenderswitchToggle");

@@ -36,8 +36,7 @@ namespace inputRec
 		recordingConLog(fmt::format("[REC]: {}\n", log));
 
 		// NOTE - Color is not currently used for OSD logs
-		if (GSosdLog)
-			GSosdLog(log.c_str(), wxGetApp().GetProgramLog()->GetRGBA(ConsoleColors::Color_StrongMagenta));
+		GSosdLog(log.c_str(), wxGetApp().GetProgramLog()->GetRGBA(ConsoleColors::Color_StrongMagenta));
 	}
 
 	static void consoleLog(const std::string log)

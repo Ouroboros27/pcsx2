@@ -32,16 +32,16 @@ class LogWriteEvent;
 //
 class PipeRedirectionBase
 {
-	DeclareNoncopyableObject( PipeRedirectionBase );
+	DeclareNoncopyableObject(PipeRedirectionBase);
 
 public:
-	virtual ~PipeRedirectionBase() =0;	// abstract destructor, forces abstract class behavior
+	virtual ~PipeRedirectionBase() = 0; // abstract destructor, forces abstract class behavior
 
 protected:
 	PipeRedirectionBase() {}
 };
 
-extern PipeRedirectionBase* NewPipeRedir( FILE* stdstream );
+extern PipeRedirectionBase* NewPipeRedir(FILE* stdstream);
 
 // --------------------------------------------------------------------------------------
 //  pxLogConsole
@@ -56,7 +56,7 @@ public:
 	pxLogConsole() {}
 
 protected:
-	virtual void DoLogRecord(wxLogLevel level, const wxString &message, const wxLogRecordInfo &info);
+	virtual void DoLogRecord(wxLogLevel level, const wxString& message, const wxLogRecordInfo& info);
 };
 
 
@@ -74,8 +74,8 @@ protected:
 	void ExecuteTaskInThread();
 
 public:
-	ConsoleTestThread() :
-		m_done( false )
+	ConsoleTestThread()
+		: m_done(false)
 	{
 	}
 
@@ -105,17 +105,17 @@ protected:
 
 	public:
 		virtual ~ColorArray() = default;
-		ColorArray( int fontsize=8 );
+		ColorArray(int fontsize = 8);
 
-		void SetFont( const wxFont& font );
-		void SetFont( int fontsize );
-		u32 GetRGBA( const ConsoleColors color );
+		void SetFont(const wxFont& font);
+		void SetFont(int fontsize);
+		u32 GetRGBA(const ConsoleColors color);
 
-		const wxTextAttr& operator[]( ConsoleColors coloridx ) const
+		const wxTextAttr& operator[](ConsoleColors coloridx) const
 		{
 			return m_table[(int)coloridx];
 		}
-		
+
 		void SetColorScheme_Dark();
 		void SetColorScheme_Light();
 	};
@@ -123,11 +123,19 @@ protected:
 	class ColorSection
 	{
 	public:
-		ConsoleColors	color;
-		int				startpoint;
+		ConsoleColors color;
+		int startpoint;
 
-		ColorSection() : color(Color_Default), startpoint(0) {}
-		ColorSection( ConsoleColors _color, int msgptr ) : color(_color), startpoint(msgptr) { }
+		ColorSection()
+			: color(Color_Default)
+			, startpoint(0)
+		{
+		}
+		ColorSection(ConsoleColors _color, int msgptr)
+			: color(_color)
+			, startpoint(msgptr)
+		{
+		}
 	};
 
 private:
@@ -135,14 +143,14 @@ private:
 	wxColor darkThemeBgColor = wxColor(38, 41, 48);
 
 protected:
-	ConLogConfig&	m_conf;
-	wxTextCtrl&		m_TextCtrl;
-	wxTimer			m_timer_FlushLimiter;
-	wxTimer			m_timer_FlushUnlocker;
-	ColorArray		m_ColorTable;
+	ConLogConfig& m_conf;
+	wxTextCtrl& m_TextCtrl;
+	wxTimer m_timer_FlushLimiter;
+	wxTimer m_timer_FlushUnlocker;
+	ColorArray m_ColorTable;
 
-	int				m_flushevent_counter;
-	bool			m_FlushRefreshLocked;
+	int m_flushevent_counter;
+	bool m_FlushRefreshLocked;
 
 	// ----------------------------------------------------------------------------
 	//  Queue State Management Vars
@@ -150,32 +158,32 @@ protected:
 
 	// Boolean indicating if a flush message is already in the Main message queue.  Used
 	// to prevent spamming the main thread with redundant messages.
-	std::atomic<bool>			m_pendingFlushMsg;
+	std::atomic<bool> m_pendingFlushMsg;
 
 	// This is a counter of the number of threads waiting for the Queue to flush.
-	std::atomic<int>			m_WaitingThreadsForFlush;
+	std::atomic<int> m_WaitingThreadsForFlush;
 
 	// Indicates to the main thread if a child thread is actively writing to the log.  If
 	// true the main thread will sleep briefly to allow the child a chance to accumulate
 	// more messages (helps avoid rapid successive flushes on high volume logging).
-	std::atomic<bool>			m_ThreadedLogInQueue;
+	std::atomic<bool> m_ThreadedLogInQueue;
 
 	// Used by threads waiting on the queue to flush.
-	Semaphore				m_sem_QueueFlushed;
+	Semaphore m_sem_QueueFlushed;
 
 	// Lock object for accessing or modifying the following three vars:
 	//  m_QueueBuffer, m_QueueColorSelection, m_CurQueuePos
-	Mutex					m_mtx_Queue;
+	Mutex m_mtx_Queue;
 
 	// Describes a series of colored text sections in the m_QueueBuffer.
-	SafeList<ColorSection>	m_QueueColorSection;
+	SafeList<ColorSection> m_QueueColorSection;
 
 	// Series of Null-terminated strings, each one has a corresponding entry in
 	// m_QueueColorSelection.
-	SafeArray<wxChar>		m_QueueBuffer;
+	SafeArray<wxChar> m_QueueBuffer;
 
 	// Current write position into the m_QueueBuffer;
-	int						m_CurQueuePos;
+	int m_CurQueuePos;
 
 	// Threaded log spammer, useful for testing console logging performance.
 	// (alternatively you can enable Disasm logging in any recompiler and achieve
@@ -184,24 +192,24 @@ protected:
 
 public:
 	// ctor & dtor
-	ConsoleLogFrame( MainEmuFrame *pParent, const wxString& szTitle, ConLogConfig& options );
+	ConsoleLogFrame(MainEmuFrame* pParent, const wxString& szTitle, ConLogConfig& options);
 	virtual ~ConsoleLogFrame();
 
 	// Retrieves the current configuration options settings for this box.
 	// (settings change if the user moves the window or changes the font size)
 	const ConLogConfig& GetConfig() const { return m_conf; }
-	u32 GetRGBA( const ConsoleColors color ) { return m_ColorTable.GetRGBA( color ); }
+	u32 GetRGBA(const ConsoleColors color) { return m_ColorTable.GetRGBA(color); }
 
-	bool Write( ConsoleColors color, const wxString& text );
+	bool Write(ConsoleColors color, const wxString& text);
 	bool Newline();
 
 	void UpdateLogList();
 
 protected:
 	// menu callbacks
-	void OnOpen (wxCommandEvent& event);
+	void OnOpen(wxCommandEvent& event);
 	void OnClose(wxCommandEvent& event);
-	void OnSave (wxCommandEvent& event);
+	void OnSave(wxCommandEvent& event);
 	void OnClear(wxCommandEvent& event);
 	void OnLogSettings(wxCommandEvent& event);
 
@@ -217,29 +225,31 @@ protected:
 
 	virtual void OnCloseWindow(wxCloseEvent& event);
 
-	void OnSetTitle( wxCommandEvent& event );
-	void OnFlushUnlockerTimer( wxTimerEvent& evt );
-	void OnFlushEvent( wxCommandEvent& event );
+	void OnSetTitle(wxCommandEvent& event);
+	void OnFlushUnlockerTimer(wxTimerEvent& evt);
+	void OnFlushEvent(wxCommandEvent& event);
 
 	void DoFlushQueue();
-	void DoFlushEvent( bool isPending );
+	void DoFlushEvent(bool isPending);
 
-	void OnMoveAround( wxMoveEvent& evt );
-	void OnResize( wxSizeEvent& evt );
-	void OnActivate( wxActivateEvent& evt );
+	void OnMoveAround(wxMoveEvent& evt);
+	void OnResize(wxSizeEvent& evt);
+	void OnActivate(wxActivateEvent& evt);
 
 	void OnLoggingChanged();
 };
 
 void OSDlog(ConsoleColors color, bool console, const std::string& str);
 
-template<typename ... Args>
-void OSDlog(ConsoleColors color, bool console, const std::string& format, Args ... args) {
-	if (!GSosdLog && !console) return;
+template <typename... Args>
+void OSDlog(ConsoleColors color, bool console, const std::string& format, Args... args)
+{
+	if (!console)
+		return;
 
-	size_t size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
+	size_t size = snprintf(nullptr, 0, format.c_str(), args...) + 1; // Extra space for '\0'
 	std::vector<char> buf(size);
-	snprintf( buf.data(), size, format.c_str(), args ... );
+	snprintf(buf.data(), size, format.c_str(), args...);
 
 	OSDlog(color, console, buf.data());
 }

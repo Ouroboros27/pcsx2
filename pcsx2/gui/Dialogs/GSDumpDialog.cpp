@@ -27,7 +27,6 @@
 
 #include "PathDefs.h"
 #include "AppConfig.h"
-#include "Plugins.h"
 #include "GSFrame.h"
 #include "Counters.h"
 
@@ -59,12 +58,12 @@ using namespace pxSizerFlags;
 Dialogs::GSDumpDialog::GSDumpDialog(wxWindow* parent)
 	: wxDialogWithHelpers(parent, _("GS Debugger"), pxDialogFlags().SetMinimize())
 	, m_dump_list(new wxListView(this, ID_DUMP_LIST, wxDefaultPosition, wxSize(400, 300), wxLC_NO_HEADER | wxLC_REPORT | wxLC_SINGLE_SEL))
-	, m_preview_image(new wxStaticBitmap(this, wxID_ANY, wxBitmap(EmbeddedImage<res_NoIcon>().Get()), wxDefaultPosition, wxSize(400,250)))
+	, m_preview_image(new wxStaticBitmap(this, wxID_ANY, wxBitmap(EmbeddedImage<res_NoIcon>().Get()), wxDefaultPosition, wxSize(400, 250)))
 	, m_debug_mode(new wxCheckBox(this, ID_DEBUG_MODE, _("Debug Mode")))
 	, m_renderer_overrides(new wxRadioBox())
 	, m_gif_list(new wxTreeCtrl(this, ID_SEL_PACKET, wxDefaultPosition, wxSize(400, 300), wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT))
 	, m_gif_packet(new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxSize(400, 300), wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT))
-	, m_start(new wxButton(this, ID_RUN_START, _("Go to Start"), wxDefaultPosition, wxSize(150,50)))
+	, m_start(new wxButton(this, ID_RUN_START, _("Go to Start"), wxDefaultPosition, wxSize(150, 50)))
 	, m_step(new wxButton(this, ID_RUN_STEP, _("Step"), wxDefaultPosition, wxSize(150, 50)))
 	, m_selection(new wxButton(this, ID_RUN_CURSOR, _("Run to Selection"), wxDefaultPosition, wxSize(150, 50)))
 	, m_vsync(new wxButton(this, ID_RUN_VSYNC, _("Go to next VSync"), wxDefaultPosition, wxSize(150, 50)))
@@ -114,7 +113,7 @@ Dialogs::GSDumpDialog::GSDumpDialog(wxWindow* parent)
 	debugger->Add(dbg_tree);
 	debugger->Add(dbg_actions);
 	debugger->Add(gif);
-	
+
 	*this += dumps;
 	*this += debugger;
 
@@ -170,7 +169,7 @@ void Dialogs::GSDumpDialog::SelectedDump(wxListEvent& evt)
 	if (wxFileExists(filename_preview))
 	{
 		auto img = wxImage(filename_preview);
-		img.Rescale(400,250, wxIMAGE_QUALITY_HIGH);
+		img.Rescale(400, 250, wxIMAGE_QUALITY_HIGH);
 		m_preview_image->SetBitmap(wxBitmap(img));
 	}
 	else
@@ -275,7 +274,7 @@ void Dialogs::GSDumpDialog::ToVSync(wxCommandEvent& event)
 
 void Dialogs::GSDumpDialog::OpenSettings(wxCommandEvent& event)
 {
-	GetCorePlugins().Configure(PluginId_GS);
+	GSconfigure();
 }
 
 void Dialogs::GSDumpDialog::ToStart(wxCommandEvent& event)
@@ -378,8 +377,8 @@ void Dialogs::GSDumpDialog::GenPacketInfo(GSData& dump)
 						for (u32 i = 0; i < nreg; i++)
 						{
 							u128 reg_data;
-							reg_data.lo =  *(u64*)(dump.data.get() + p);
-							reg_data.hi =  *(u64*)(dump.data.get() + p + 8);
+							reg_data.lo = *(u64*)(dump.data.get() + p);
+							reg_data.hi = *(u64*)(dump.data.get() + p + 8);
 							ParseTreeReg(regId, (GIFReg)((regs >> (i * 4)) & ((u64)(1 << 4) - 1)), reg_data, true);
 							p += 16;
 						}
@@ -393,7 +392,7 @@ void Dialogs::GSDumpDialog::GenPacketInfo(GSData& dump)
 						for (u32 i = 0; i < nreg; i++)
 						{
 							u128 reg_data;
-							reg_data.lo =  *(u64*)(dump.data.get() + p);
+							reg_data.lo = *(u64*)(dump.data.get() + p);
 							ParseTreeReg(regId, (GIFReg)((regs >> (i * 4)) & ((u64)(1 << 4) - 1)), reg_data, false);
 							p += 8;
 						}
@@ -493,7 +492,7 @@ void Dialogs::GSDumpDialog::ParseTreeReg(wxTreeItemId& id, GIFReg reg, u128 data
 			s.Printf("U = %f", (double)(data.lo & ((u64)(1 << 14) - 1)) / 16.0);
 			if (packed)
 				v = (double)((data.lo >> 32) & ((u64)(1 << 14) - 1)) / 16.0;
-			else 
+			else
 				v = (double)((data.lo >> 16) & ((u64)(1 << 14) - 1)) / 16.0;
 			t.Printf("V = %f", v);
 			m_gif_packet->AppendItem(rootId, s);
@@ -543,7 +542,7 @@ void Dialogs::GSDumpDialog::ParseTreeReg(wxTreeItemId& id, GIFReg reg, u128 data
 			{
 				xyz_infos[0].Printf("X = %f", (float)(data.lo & ((u64)(1 << 16) - 1)) / 16.0);
 				xyz_infos[1].Printf("Y = %f", (float)((data.lo >> 16) & ((u64)(1 << 16) - 1)) / 16.0);
-				xyz_infos[2].Printf("Z = %u", *(u32*)(&data.lo)+4);
+				xyz_infos[2].Printf("Z = %u", *(u32*)(&data.lo) + 4);
 			}
 
 			for (auto& el : xyz_infos)
@@ -632,17 +631,17 @@ void Dialogs::GSDumpDialog::ProcessDumpEvent(const GSData& event, char* regs)
 					std::unique_ptr<char[]> data(new char[16384]);
 					int addr = 16384 - event.length;
 					memcpy(data.get(), event.data.get() + addr, event.length);
-					GSgifTransfer1((u32*)data.get(), addr);
+					GSgifTransfer1((u8*)data.get(), addr);
 					break;
 				}
 				case Path1New:
-					GSgifTransfer((u32*)event.data.get(), event.length / 16);
+					GSgifTransfer((u8*)event.data.get(), event.length / 16);
 					break;
 				case Path2:
-					GSgifTransfer2((u32*)event.data.get(), event.length / 16);
+					GSgifTransfer2((u8*)event.data.get(), event.length / 16);
 					break;
 				case Path3:
-					GSgifTransfer3((u32*)event.data.get(), event.length / 16);
+					GSgifTransfer3((u8*)event.data.get(), event.length / 16);
 					break;
 				default:
 					break;
@@ -661,7 +660,7 @@ void Dialogs::GSDumpDialog::ProcessDumpEvent(const GSData& event, char* regs)
 		case ReadFIFO2:
 		{
 			std::unique_ptr<char[]> arr(new char[*((int*)event.data.get())]);
-			GSreadFIFO2((u64*)arr.get(), *((int*)event.data.get()));
+			GSreadFIFO2((u8*)arr.get(), *((int*)event.data.get()));
 			break;
 		}
 		case Registers:
@@ -730,7 +729,7 @@ void Dialogs::GSDumpDialog::GSThread::ExecuteTaskInThread()
 	m_dump_file->Read(state_data.get(), ss);
 	m_dump_file->Read(&regs, 8192);
 
-	freezeData fd = {(int)ss, (s8*)state_data.get()};
+	GSFreezeData fd = {(int)ss, (u8*)state_data.get()};
 	m_root_window->m_dump_packets.clear();
 
 	while (m_dump_file->Tell() < m_dump_file->Length())
@@ -760,7 +759,7 @@ void Dialogs::GSDumpDialog::GSThread::ExecuteTaskInThread()
 		m_root_window->m_dump_packets.push_back({id, std::move(data), size, id_transfer});
 	}
 
-	GetCorePlugins().Init();
+	GSinit();
 	sApp.OpenGsPanel();
 
 	// to gather the gs frame object we have to be a bit hacky since sApp is not syntax complete
@@ -773,8 +772,8 @@ void Dialogs::GSDumpDialog::GSThread::ExecuteTaskInThread()
 		g_FrameCount = 0;
 	}
 
-	GSsetBaseMem((void*)regs);
-	if (GSopen2((void*)pDsp, (renderer_override<<24)) != 0)
+	GSsetBaseMem((u8*)regs);
+	if (GSopen2((void**)pDsp, (renderer_override << 24)) != 0)
 	{
 		OnStop();
 		return;
@@ -782,12 +781,12 @@ void Dialogs::GSDumpDialog::GSThread::ExecuteTaskInThread()
 
 	GSsetGameCRC((int)crc, 0);
 
-	if (!GetCorePlugins().DoFreeze(PluginId_GS, 0, &fd, true))
+	if (!GSfreeze(0, &fd))
 		GSDump::isRunning = false;
 	GSvsync(1);
 	GSreset();
-	GSsetBaseMem((void*)regs);
-	GetCorePlugins().DoFreeze(PluginId_GS, 0, &fd, true);
+	GSsetBaseMem((u8*)regs);
+	GSfreeze(0, &fd);
 
 	size_t i = 0;
 	m_debug_index = 0;
@@ -855,8 +854,8 @@ void Dialogs::GSDumpDialog::GSThread::ExecuteTaskInThread()
 		{
 			if (!window->IsShown())
 			{
-				GetCorePlugins().Close();
-				GetCorePlugins().Shutdown();
+				GSclose();
+				GSshutdown();
 				sApp.CloseGsPanel();
 				GSDump::isRunning = false;
 			}
