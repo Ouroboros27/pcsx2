@@ -160,7 +160,7 @@ void GSclose()
 	}
 }
 
-static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int threads = -1)
+int _GSopen(void** dsp, const char* title, GSRendererType renderer, int threads = -1)
 {
 	GSDevice* dev = NULL;
 	bool old_api = *dsp == NULL;
@@ -1337,7 +1337,7 @@ inline unsigned long timeGetTime()
 }
 
 // Note
-GSReplay(char* lpszCmdLine, int renderer)
+void GSReplay(char* lpszCmdLine, int renderer)
 {
 	GLLoader::in_replayer = true;
 	// Required by multithread driver

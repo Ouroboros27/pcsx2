@@ -65,6 +65,7 @@ typedef int BOOL;
 #define FALSE 0
 
 
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Begin Pcsx2 Includes: Add items here that are local to Pcsx2 but stay relatively
 // unchanged for long periods of time, or happen to be used by almost everything, so they

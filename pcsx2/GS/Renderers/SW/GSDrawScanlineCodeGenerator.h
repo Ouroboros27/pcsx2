@@ -25,12 +25,10 @@
 #include "../Common/GSFunctionMap.h"
 #include "../../GSUtil.h"
 
-using namespace Xbyak;
-
 #if defined(_M_AMD64) || defined(_WIN64)
-#define RegLong Reg64
+#define RegLong Xbyak::Reg64
 #else
-#define RegLong Reg32
+#define RegLong Xbyak::Reg32
 #endif
 
 class GSDrawScanlineCodeGenerator : public GSCodeGenerator
@@ -67,7 +65,7 @@ class GSDrawScanlineCodeGenerator : public GSCodeGenerator
 	void WriteFrame();
 	void ReadPixel(const Ymm& dst, const Ymm& temp, const RegLong& addr);
 	void WritePixel(const Ymm& src, const Ymm& temp, const RegLong& addr, const Reg32& mask, bool fast, int psm, int fz);
-	void WritePixel(const Xmm& src, const RegLong& addr, uint8 i, uint8 j, int psm);
+	void WritePixel(const Xbyak::Xmm& src, const RegLong& addr, uint8 i, uint8 j, int psm);
 	void ReadTexel(int pixels, int mip_offset = 0);
 	void ReadTexel(const Ymm& dst, const Ymm& addr, uint8 i);
 
@@ -76,13 +74,13 @@ class GSDrawScanlineCodeGenerator : public GSCodeGenerator
 	void Generate_SSE();
 	void Init_SSE();
 	void Step_SSE();
-	void TestZ_SSE(const Xmm& temp1, const Xmm& temp2);
+	void TestZ_SSE(const Xbyak::Xmm& temp1, const Xbyak::Xmm& temp2);
 	void SampleTexture_SSE();
-	void Wrap_SSE(const Xmm& uv0);
-	void Wrap_SSE(const Xmm& uv0, const Xmm& uv1);
+	void Wrap_SSE(const Xbyak::Xmm& uv0);
+	void Wrap_SSE(const Xbyak::Xmm& uv0, const Xbyak::Xmm& uv1);
 	void SampleTextureLOD_SSE();
-	void WrapLOD_SSE(const Xmm& uv0);
-	void WrapLOD_SSE(const Xmm& uv0, const Xmm& uv1);
+	void WrapLOD_SSE(const Xbyak::Xmm& uv0);
+	void WrapLOD_SSE(const Xbyak::Xmm& uv0, const Xbyak::Xmm& uv1);
 	void AlphaTFX_SSE();
 	void ReadMask_SSE();
 	void TestAlpha_SSE();
@@ -94,22 +92,22 @@ class GSDrawScanlineCodeGenerator : public GSCodeGenerator
 	void WriteZBuf_SSE();
 	void AlphaBlend_SSE();
 	void WriteFrame_SSE();
-	void ReadPixel_SSE(const Xmm& dst, const RegLong& addr);
-	void WritePixel_SSE(const Xmm& src, const RegLong& addr, const Reg8& mask, bool fast, int psm, int fz);
-	void WritePixel_SSE(const Xmm& src, const RegLong& addr, uint8 i, int psm);
+	void ReadPixel_SSE(const Xbyak::Xmm& dst, const RegLong& addr);
+	void WritePixel_SSE(const Xbyak::Xmm& src, const RegLong& addr, const Xbyak::Reg8& mask, bool fast, int psm, int fz);
+	void WritePixel_SSE(const Xbyak::Xmm& src, const RegLong& addr, uint8 i, int psm);
 	void ReadTexel_SSE(int pixels, int mip_offset = 0);
-	void ReadTexel_SSE(const Xmm& dst, const Xmm& addr, uint8 i);
+	void ReadTexel_SSE(const Xbyak::Xmm& dst, const Xbyak::Xmm& addr, uint8 i);
 
 	void Generate_AVX();
 	void Init_AVX();
 	void Step_AVX();
-	void TestZ_AVX(const Xmm& temp1, const Xmm& temp2);
+	void TestZ_AVX(const Xbyak::Xmm& temp1, const Xbyak::Xmm& temp2);
 	void SampleTexture_AVX();
-	void Wrap_AVX(const Xmm& uv0);
-	void Wrap_AVX(const Xmm& uv0, const Xmm& uv1);
+	void Wrap_AVX(const Xbyak::Xmm& uv0);
+	void Wrap_AVX(const Xbyak::Xmm& uv0, const Xbyak::Xmm& uv1);
 	void SampleTextureLOD_AVX();
-	void WrapLOD_AVX(const Xmm& uv0);
-	void WrapLOD_AVX(const Xmm& uv0, const Xmm& uv1);
+	void WrapLOD_AVX(const Xbyak::Xmm& uv0);
+	void WrapLOD_AVX(const Xbyak::Xmm& uv0, const Xbyak::Xmm& uv1);
 	void AlphaTFX_AVX();
 	void ReadMask_AVX();
 	void TestAlpha_AVX();
@@ -121,25 +119,25 @@ class GSDrawScanlineCodeGenerator : public GSCodeGenerator
 	void WriteZBuf_AVX();
 	void AlphaBlend_AVX();
 	void WriteFrame_AVX();
-	void ReadPixel_AVX(const Xmm& dst, const RegLong& addr);
-	void WritePixel_AVX(const Xmm& src, const RegLong& addr, const Reg8& mask, bool fast, int psm, int fz);
-	void WritePixel_AVX(const Xmm& src, const RegLong& addr, uint8 i, int psm);
+	void ReadPixel_AVX(const Xbyak::Xmm& dst, const RegLong& addr);
+	void WritePixel_AVX(const Xbyak::Xmm& src, const RegLong& addr, const Xbyak::Reg8& mask, bool fast, int psm, int fz);
+	void WritePixel_AVX(const Xbyak::Xmm& src, const RegLong& addr, uint8 i, int psm);
 	void ReadTexel_AVX(int pixels, int mip_offset = 0);
-	void ReadTexel_AVX(const Xmm& dst, const Xmm& addr, uint8 i);
+	void ReadTexel_AVX(const Xbyak::Xmm& dst, const Xbyak::Xmm& addr, uint8 i);
 
 #endif
 
-	void modulate16(const Xmm& a, const Operand& f, uint8 shift);
-	void lerp16(const Xmm& a, const Xmm& b, const Xmm& f, uint8 shift);
-	void lerp16_4(const Xmm& a, const Xmm& b, const Xmm& f);
-	void mix16(const Xmm& a, const Xmm& b, const Xmm& temp);
-	void clamp16(const Xmm& a, const Xmm& temp);
-	void alltrue(const Xmm& test);
-	void blend(const Xmm& a, const Xmm& b, const Xmm& mask);
-	void blendr(const Xmm& b, const Xmm& a, const Xmm& mask);
-	void blend8(const Xmm& a, const Xmm& b);
-	void blend8r(const Xmm& b, const Xmm& a);
-	void split16_2x8(const Xmm& l, const Xmm& h, const Xmm& src);
+	void modulate16(const Xbyak::Xmm& a, const Xbyak::Operand& f, uint8 shift);
+	void lerp16(const Xbyak::Xmm& a, const Xbyak::Xmm& b, const Xbyak::Xmm& f, uint8 shift);
+	void lerp16_4(const Xbyak::Xmm& a, const Xbyak::Xmm& b, const Xbyak::Xmm& f);
+	void mix16(const Xbyak::Xmm& a, const Xbyak::Xmm& b, const Xbyak::Xmm& temp);
+	void clamp16(const Xbyak::Xmm& a, const Xbyak::Xmm& temp);
+	void alltrue(const Xbyak::Xmm& test);
+	void blend(const Xbyak::Xmm& a, const Xbyak::Xmm& b, const Xbyak::Xmm& mask);
+	void blendr(const Xbyak::Xmm& b, const Xbyak::Xmm& a, const Xbyak::Xmm& mask);
+	void blend8(const Xbyak::Xmm& a, const Xbyak::Xmm& b);
+	void blend8r(const Xbyak::Xmm& b, const Xbyak::Xmm& a);
+	void split16_2x8(const Xbyak::Xmm& l, const Xbyak::Xmm& h, const Xbyak::Xmm& src);
 
 public:
 	GSDrawScanlineCodeGenerator(void* param, uint64 key, void* code, size_t maxsize);

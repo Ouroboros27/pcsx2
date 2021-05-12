@@ -14,12 +14,16 @@ if(NOT TOP_CMAKE_WAS_SOURCED)
     It is advice to delete all wrongly generated cmake stuff => CMakeFiles & CMakeCache.txt")
 endif()
 
+include_directories ("${CMAKE_SOURCE_DIR}/3rdparty/xbyak/")
 
 set(CommonFlags
     -fno-strict-aliasing
     -Wstrict-aliasing # Allow to track strict aliasing issue.
     -Wno-parentheses
     -Wno-missing-braces
+    -Wno-unknown-pragmas
+    # gs is pretty bad at this
+    -Wno-packed-not-aligned
     -DWX_PRECOMP
 	)
 
@@ -551,7 +555,6 @@ set(pcsx2PADHeaders
     ${PADImgHeader}/arrow_right.h
     )
 
-include_directories ("${CMAKE_SOURCE_DIR}/3rdparty/xbyak/")
 
 # GS sources
 set(pcsx2GSSources
@@ -574,6 +577,7 @@ set(pcsx2GSSources
     GS/GSVector.cpp
     GS/GSdx.cpp
     GS/GS_res.cpp
+    GS/GS_types.h
     GS/Renderers/Common/GSDevice.cpp
     GS/Renderers/Common/GSDirtyRect.cpp
     GS/Renderers/Common/GSFunctionMap.cpp
