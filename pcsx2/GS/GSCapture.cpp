@@ -23,6 +23,7 @@
 #include "GSCapture.h"
 #include "GSPng.h"
 #include "GSUtil.h"
+#include "GS_types.h"
 
 #ifdef _WIN32
 
@@ -51,36 +52,47 @@ public:
 #define BeginEnumFilters(pFilterGraph, pEnumFilters, pBaseFilter) \
 	{ \
 		CComPtr<IEnumFilters> pEnumFilters; \
-		if(pFilterGraph && SUCCEEDED(pFilterGraph->EnumFilters(&pEnumFilters))) \
+		if (pFilterGraph && SUCCEEDED(pFilterGraph->EnumFilters(&pEnumFilters))) \
 		{ \
-			for(CComPtr<IBaseFilter> pBaseFilter; S_OK == pEnumFilters->Next(1, &pBaseFilter, 0); pBaseFilter = NULL) \
+			for (CComPtr<IBaseFilter> pBaseFilter; S_OK == pEnumFilters->Next(1, &pBaseFilter, 0); pBaseFilter = NULL) \
 			{
 
-#define EndEnumFilters }}}
+#define EndEnumFilters \
+	} \
+	} \
+	}
 
 #define BeginEnumPins(pBaseFilter, pEnumPins, pPin) \
 	{ \
 		CComPtr<IEnumPins> pEnumPins; \
-		if(pBaseFilter && SUCCEEDED(pBaseFilter->EnumPins(&pEnumPins))) \
+		if (pBaseFilter && SUCCEEDED(pBaseFilter->EnumPins(&pEnumPins))) \
 		{ \
-			for(CComPtr<IPin> pPin; S_OK == pEnumPins->Next(1, &pPin, 0); pPin = NULL) \
+			for (CComPtr<IPin> pPin; S_OK == pEnumPins->Next(1, &pPin, 0); pPin = NULL) \
 			{
 
-#define EndEnumPins }}}
+#define EndEnumPins \
+	} \
+	} \
+	}
 
 //
 // GSSource
 //
 interface __declspec(uuid("59C193BB-C520-41F3-BC1D-E245B80A86FA"))
-IGSSource : public IUnknown
+	IGSSource : public IUnknown
 {
-	STDMETHOD(DeliverNewSegment)() PURE;
-	STDMETHOD(DeliverFrame)(const void* bits, int pitch, bool rgba) PURE;
-	STDMETHOD(DeliverEOS)() PURE;
+	STDMETHOD(DeliverNewSegment)
+	() PURE;
+	STDMETHOD(DeliverFrame)
+	(const void* bits, int pitch, bool rgba) PURE;
+	STDMETHOD(DeliverEOS)
+	() PURE;
 };
 
 class __declspec(uuid("F8BB6F4F-0965-4ED4-BA74-C6A01E6E6C77"))
-GSSource : public CBaseFilter, private CCritSec, public IGSSource
+	GSSource : public CBaseFilter,
+			   private CCritSec,
+			   public IGSSource
 {
 	GSVector2i m_size;
 	REFERENCE_TIME m_atpf;
@@ -88,9 +100,7 @@ GSSource : public CBaseFilter, private CCritSec, public IGSSource
 
 	STDMETHODIMP NonDelegatingQueryInterface(REFIID riid, void** ppv)
 	{
-		return riid == __uuidof(IGSSource)
-			? GetInterface((IGSSource*)this, ppv)
-			: __super::NonDelegatingQueryInterface(riid, ppv);
+		return riid == __uuidof(IGSSource) ? GetInterface((IGSSource*)this, ppv) : __super::NonDelegatingQueryInterface(riid, ppv);
 	}
 
 	class GSSourceOutputPin : public CBaseOutputPin
@@ -395,7 +405,7 @@ static IPin* GetFirstPin(IBaseFilter* pBF, PIN_DIRECTION dir)
 	}
 	EndEnumPins
 
-	return nullptr;
+		return nullptr;
 }
 
 #endif
@@ -405,8 +415,9 @@ static IPin* GetFirstPin(IBaseFilter* pBF, PIN_DIRECTION dir)
 //
 
 GSCapture::GSCapture()
-	: m_capturing(false), m_frame(0)
-	, m_out_dir("/tmp/GSdx_Capture") // FIXME Later add an option
+	: m_capturing(false)
+	, m_frame(0)
+	, m_out_dir("/tmp/GS_Capture") // FIXME Later add an option
 {
 	m_out_dir = theApp.GetConfigS("capture_out_dir");
 	m_threads = theApp.GetConfigI("capture_threads");
@@ -467,10 +478,7 @@ bool GSCapture::BeginCapture(float fps, GSVector2i recommendedResolution, float 
 	CComPtr<ICaptureGraphBuilder2> cgb;
 	CComPtr<IBaseFilter> mux;
 
-	if (FAILED(hr = m_graph.CoCreateInstance(CLSID_FilterGraph))
-	 || FAILED(hr = cgb.CoCreateInstance(CLSID_CaptureGraphBuilder2))
-	 || FAILED(hr = cgb->SetFiltergraph(m_graph))
-	 || FAILED(hr = cgb->SetOutputFileName(&MEDIASUBTYPE_Avi, std::wstring(dlg.m_filename.begin(), dlg.m_filename.end()).c_str(), &mux, NULL)))
+	if (FAILED(hr = m_graph.CoCreateInstance(CLSID_FilterGraph)) || FAILED(hr = cgb.CoCreateInstance(CLSID_CaptureGraphBuilder2)) || FAILED(hr = cgb->SetFiltergraph(m_graph)) || FAILED(hr = cgb->SetOutputFileName(&MEDIASUBTYPE_Avi, std::wstring(dlg.m_filename.begin(), dlg.m_filename.end()).c_str(), &mux, NULL)))
 	{
 		return false;
 	}
@@ -491,8 +499,7 @@ bool GSCapture::BeginCapture(float fps, GSVector2i recommendedResolution, float 
 			return false;
 		}
 
-		if (FAILED(hr = m_graph->ConnectDirect(GetFirstPin(m_src, PINDIR_OUTPUT), GetFirstPin(dlg.m_enc, PINDIR_INPUT), NULL))
-		 || FAILED(hr = m_graph->ConnectDirect(GetFirstPin(dlg.m_enc, PINDIR_OUTPUT), GetFirstPin(mux, PINDIR_INPUT), NULL)))
+		if (FAILED(hr = m_graph->ConnectDirect(GetFirstPin(m_src, PINDIR_OUTPUT), GetFirstPin(dlg.m_enc, PINDIR_INPUT), NULL)) || FAILED(hr = m_graph->ConnectDirect(GetFirstPin(dlg.m_enc, PINDIR_OUTPUT), GetFirstPin(mux, PINDIR_INPUT), NULL)))
 		{
 			return false;
 		}
@@ -517,7 +524,7 @@ bool GSCapture::BeginCapture(float fps, GSVector2i recommendedResolution, float 
 	}
 	EndEnumFilters
 
-	hr = CComQIPtr<IMediaControl>(m_graph)->Run();
+		hr = CComQIPtr<IMediaControl>(m_graph)->Run();
 
 	CComQIPtr<IGSSource>(m_src)->DeliverNewSegment();
 

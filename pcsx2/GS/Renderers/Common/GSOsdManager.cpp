@@ -20,7 +20,7 @@
  */
 
 #include "PrecompiledHeader.h"
-#include "GSdx.h"
+#include "../GS.h"
 #include "GSOsdManager.h"
 #ifdef _WIN32
 #include "resource.h"
@@ -73,11 +73,11 @@ GSOsdManager::GSOsdManager()
 	, m_onscreen_messages(0)
 	, m_texture_dirty(true)
 {
-	m_monitor_enabled       = theApp.GetConfigB("osd_monitor_enabled");
-	m_log_enabled           = theApp.GetConfigB("osd_log_enabled");
-	m_size                  = std::max(1, std::min(theApp.GetConfigI("osd_fontsize"), 100));
-	m_opacity               = std::max(0, std::min(theApp.GetConfigI("osd_color_opacity"), 100));
-	m_log_timeout           = std::max(2, std::min(theApp.GetConfigI("osd_log_timeout"), 10));
+	m_monitor_enabled = theApp.GetConfigB("osd_monitor_enabled");
+	m_log_enabled = theApp.GetConfigB("osd_log_enabled");
+	m_size = std::max(1, std::min(theApp.GetConfigI("osd_fontsize"), 100));
+	m_opacity = std::max(0, std::min(theApp.GetConfigI("osd_color_opacity"), 100));
+	m_log_timeout = std::max(2, std::min(theApp.GetConfigI("osd_log_timeout"), 10));
 	m_max_onscreen_messages = std::max(1, std::min(theApp.GetConfigI("osd_max_log_messages"), 20));
 
 	int r = std::max(0, std::min(theApp.GetConfigI("osd_color_r"), 255));
@@ -168,17 +168,17 @@ void dumb_utf8_to_utf32(const char* utf8, char32_t* utf32, unsigned size)
 		}
 		else if ((*utf8 & 0xF0) == 0xE0)
 		{
-			*utf32++ =                          (utf8[0] & 0x0F) << 12 | (utf8[1] & 0x3F) << 6 | utf8[2] & 0x3F;
+			*utf32++ = (utf8[0] & 0x0F) << 12 | (utf8[1] & 0x3F) << 6 | utf8[2] & 0x3F;
 			utf8 += 3;
 		}
 		else if ((*utf8 & 0xE0) == 0xC0)
 		{
-			*utf32++ =                                                   (utf8[0] & 0x1F) << 6 | utf8[1] & 0x3F;
+			*utf32++ = (utf8[0] & 0x1F) << 6 | utf8[1] & 0x3F;
 			utf8 += 2;
 		}
 		else if ((*utf8 & 0x80) == 0x00)
 		{
-			*utf32++ =                                                                           utf8[0] & 0x7F;
+			*utf32++ = utf8[0] & 0x7F;
 			utf8 += 1;
 		}
 	}
@@ -289,24 +289,24 @@ void GSOsdManager::RenderGlyph(GSVertexPT1* dst, const glyph_info g, float x, fl
 	float w = g.bw * (2.0f / m_real_size.x);
 	float h = g.bh * (2.0f / m_real_size.y);
 
-	dst->p = GSVector4(x2    , -y2    , 0.0f, 1.0f);
-	dst->t = GSVector2(g.tx       , 0.0f);
+	dst->p = GSVector4(x2, -y2, 0.0f, 1.0f);
+	dst->t = GSVector2(g.tx, 0.0f);
 	dst->c = color;
 	++dst;
-	dst->p = GSVector4(x2 + w, -y2    , 0.0f, 1.0f);
+	dst->p = GSVector4(x2 + w, -y2, 0.0f, 1.0f);
 	dst->t = GSVector2(g.tx + g.tw, 0.0f);
 	dst->c = color;
 	++dst;
-	dst->p = GSVector4(x2    , -y2 - h, 0.0f, 1.0f);
-	dst->t = GSVector2(g.tx       , g.ty);
+	dst->p = GSVector4(x2, -y2 - h, 0.0f, 1.0f);
+	dst->t = GSVector2(g.tx, g.ty);
 	dst->c = color;
 	++dst;
-	dst->p = GSVector4(x2 + w, -y2    , 0.0f, 1.0f);
+	dst->p = GSVector4(x2 + w, -y2, 0.0f, 1.0f);
 	dst->t = GSVector2(g.tx + g.tw, 0.0f);
 	dst->c = color;
 	++dst;
-	dst->p = GSVector4(x2    , -y2 - h, 0.0f, 1.0f);
-	dst->t = GSVector2(g.tx       , g.ty);
+	dst->p = GSVector4(x2, -y2 - h, 0.0f, 1.0f);
+	dst->t = GSVector2(g.tx, g.ty);
 	dst->c = color;
 	++dst;
 	dst->p = GSVector4(x2 + w, -y2 - h, 0.0f, 1.0f);
@@ -366,8 +366,7 @@ size_t GSOsdManager::Size()
 			}
 
 			float ratio = (elapsed - std::chrono::seconds(m_log_timeout / 2)).count() / std::chrono::seconds(m_log_timeout / 2).count();
-			ratio = ratio > 1.0f ? 1.0f : ratio < 0.0f ? 0.0f :
-                                                         ratio;
+			ratio = ratio > 1.0f ? 1.0f : ratio < 0.0f ? 0.0f : ratio;
 
 			y += offset += ((m_size + 2) * (2.0f / m_real_size.y)) * ratio;
 			sum += it->msg.size();
